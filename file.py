@@ -12,3 +12,12 @@ btn_press_bg = "#C0B738"
 btn_txt_clr = "#2E2E2B"
 font = "OpenDyslexic"
 fontsize = 12
+
+#creating gui window
+root = tk.Tk()
+root.geometry("700x620")
+root.title("Lv3game")
+root.configure(bg=txt_clr) #background color
+
+root.mainloop()
+
