@@ -19,5 +19,17 @@ root.geometry("700x620")
 root.title("Lv3game")
 root.configure(bg=txt_clr) #background color
 
+#game text
+game_txt = tk.Label(
+    root,
+    text="",
+    bg=txt_clr, #gui background
+    fg=bg_clr, #text color
+    font=(font, fontsize, "bold")
+)
+#padding above, below
+game_txt.pack(pady=(20, 5))
+
+
 root.mainloop()
 
