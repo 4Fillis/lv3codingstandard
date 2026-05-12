@@ -4,12 +4,12 @@ from functools import partial
 import random
 
 #main colors for gui
-txt_clr = "#0e021b" #main text highlight color
-txtbg_bar_clr = "#e3d5f1" #input bar bg
-txt_bar_clr = "#390846" #user input text color
-bg_clr = "#C0B738" #main text color
-btn_press_bg = "#C0B738"
-btn_txt_clr = "#2E2E2B"
+bglbl_clr = "#AD9BC2" #main text highlight color
+txtbg_bar_clr = "#CCC9FE" #input bar bg
+txt_bar_clr = "#E6C9FE" #user input text color
+txt_clr = "#FEC9E1" #main text color & button bg color
+btn_press_bg = "#B799C9"
+btn_txt_clr = "#9A68BA"
 font = "OpenDyslexic"
 fontsize = 12
 
@@ -17,18 +17,18 @@ fontsize = 12
 root = tk.Tk()
 root.geometry("700x620")
 root.title("Lv3game")
-root.configure(bg=txt_clr) #background color
+root.configure(bg=bglbl_clr) #background color
 
-#game text
-game_txt = tk.Label(
+input_button = tk.Button(
     root,
-    text="",
-    bg=txt_clr, #gui background
-    fg=bg_clr, #text color
-    font=(font, fontsize, "bold")
-)
-#padding above, below
-game_txt.pack(pady=(20, 5))
+    text="Input btn",
+    bg=txt_clr, #bg color
+    fg=btn_txt_clr, #text color
+    activebackground=btn_press_bg, #will change to this color when pressed
+    font=(font, fontsize, "bold"))
+
+#button space 10 above, 20 below
+input_button.pack(pady=(50, 20))
 
 
 root.mainloop()
