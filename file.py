@@ -1,13 +1,11 @@
 #importing libraries
 import tkinter as tk
 from functools import partial
-import random
-import time
 
 #main colors for gui
-bglbl_clr = "#AD9BC2" #main text highlight color
+bg_clr = "#AD9BC2" #window bg color
 txtbg_bar_clr = "#CCC9FE" #input bar bg
-txt_bar_clr = "#E6C9FE" #user input text color
+txt_bar_clr = "#7A3C58" #user input text color
 txt_clr = "#FEC9E1" #main text color & button bg color
 btn_press_bg = "#B799C9"
 btn_txt_clr = "#9A68BA"
@@ -18,7 +16,7 @@ fontsize = 12
 root = tk.Tk()
 root.geometry("700x620")
 root.title("Lv3game")
-root.configure(bg=bglbl_clr) #background color
+root.configure(bg=bg_clr) #background color
 
 input_button = tk.Button(
     root,
@@ -88,5 +86,6 @@ def update_gui(txt, index=0, txt_done=txt_done, skip=False):
         txt_done[0] = root.after(50, update_gui, txt, index + 1)
 
 update_gui(txt=("testing, testing\ntesting"))
+
 root.mainloop()
 
