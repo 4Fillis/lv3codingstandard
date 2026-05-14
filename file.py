@@ -18,6 +18,7 @@ root.geometry("700x620")
 root.title("Lv3game")
 root.configure(bg=bg_clr) #background color
 
+#Input button
 input_button = tk.Button(
     root,
     text="Input btn",
@@ -32,7 +33,10 @@ input_button = tk.Button(
 entry_frame = tk.Frame(root, bg=txt_clr, padx=0, pady=0)
 entry_frame.pack()
 
-#input bar + button
+#button space 10 above, 20 below
+input_button.pack(pady=(50, 20))
+
+#input bar
 input_bar = tk.Entry(
     entry_frame,
     width=30,
@@ -45,10 +49,6 @@ input_bar = tk.Entry(
 input_bar.pack()
 #uses lambda to use function with specs in brackets
 #input_bar.bind("<Return>", lambda event: user_input(paths_dict, event))
-
-
-#button space 10 above, 20 below
-input_button.pack(pady=(50, 20))
 
 #game text
 game_txt = tk.Label(
@@ -86,6 +86,13 @@ def update_gui(txt, index=0, txt_done=txt_done, skip=False):
         txt_done[0] = root.after(50, update_gui, txt, index + 1)
 
 update_gui(txt=("testing, testing\ntesting"))
+
+
+#Takes user input and clears input bar
+def user_input(event=None):
+    input = input_bar.get().strip()
+    input_bar.delete(0, tk.END)
+
 
 root.mainloop()
 
