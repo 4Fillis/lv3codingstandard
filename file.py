@@ -2,6 +2,7 @@
 import tkinter as tk
 from functools import partial
 import random
+import time
 
 #main colors for gui
 bglbl_clr = "#AD9BC2" #main text highlight color
@@ -51,6 +52,41 @@ input_bar.pack()
 #button space 10 above, 20 below
 input_button.pack(pady=(50, 20))
 
+#game text
+game_txt = tk.Label(
+)
+#padding above, below
+game_txt.pack(pady=(20, 5))
 
+txt_done = [None] #list so changeable in function
+#ending typing 
+def tpg_end(root, txt_done):
+  if txt_done[0] is not None:
+     root.after_cancel(txt_done[0])
+     txt_done[0] = None
+
+#skip typing effect
+def tpg_skip(event=None, txt=None):
+    if txt_done[0] is not None and txt is not None:
+        update_gui(txt, index=0, txt_done=txt_done, skip=True)
+
+#update gui, end/remove text when start
+def update_gui(txt, index=0, txt_done=txt_done, skip=False):
+  if index == 0:
+      game_txt.bind("<Button-1>", partial(tpg_skip, txt=txt))
+      tpg_end(root, txt_done=txt_done)
+      game_txt.config(text="")
+
+  #skips typing effect
+  if skip:
+     game_txt.config(text=txt)
+     tpg_end(root, txt_done)
+     return
+  #wait after printing character for typing effect
+  if index < len(txt):
+        game_txt.config(text=game_txt.cget("text") + txt[index])
+        txt_done[0] = root.after(50, update_gui, txt, index + 1)
+
+update_gui(txt=("testing, testing\ntesting"))
 root.mainloop()
 
