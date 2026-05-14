@@ -88,11 +88,5 @@ def update_gui(txt, index=0, txt_done=txt_done, skip=False):
 update_gui(txt=("testing, testing\ntesting"))
 
 
-#Takes user input and clears input bar
-def user_input(event=None):
-    input = input_bar.get().strip()
-    input_bar.delete(0, tk.END)
-
-
 root.mainloop()
 
