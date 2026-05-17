@@ -50,6 +50,11 @@ input_bar.pack()
 #uses lambda to use function with specs in brackets
 #input_bar.bind("<Return>", lambda event: user_input(paths_dict, event))
 
+def clear_bar(event):
+    input_bar.delete(0, 'end')
+entry = tk.Entry(root)
+entry.bind('<Return>', clear_bar)
+
 #game text
 game_txt = tk.Label(
 )
