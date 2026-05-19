@@ -39,7 +39,7 @@ input_bar = tk.Entry(
     fg=txt_bar_clr, #text color
     font=(font, fontsize, 'bold')
 )
-input_bar.pack()
+input_bar.pack(pady=15, padx=15)
 #uses lambda to use function with specs in brackets
 #input_bar.bind("<Return>", lambda event: user_input(paths_dict, event))
 
@@ -54,8 +54,8 @@ input_btn = tk.Button(
     activebackground=btn_press_bg, #will change to this color when pressed
     font=(font, fontsize, "bold"))
 
-#button space 10 above, 20 below
-input_btn.pack(pady=(50, 20))
+#button space 15 above, 20 below
+input_btn.pack(pady=(15, 20))
 
 input_btn.config(command=lambda: input_bar.delete(0, tk.END))
 
