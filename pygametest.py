@@ -25,6 +25,8 @@ class Game:
     def run(self):
         #infite loop
         while True:
+            #adding cloud to screen
+            self.screen.blit(self.img, (100, 200))
             #gets the input
             for event in pygame.event.get():
                 #if user quits the window
