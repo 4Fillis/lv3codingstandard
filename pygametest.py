@@ -14,6 +14,9 @@ class Game:
         self.screen = pygame.display.set_mode((640, 480))
         self.clock = pygame.time.Clock()
 
+        #loading cloud img, png files reccomended
+        self.img = pygame.image.load('pygamerescources\images\cloud.png')
+
 
         #clock for making game run at 60fps to avoid overheating comptuter
         clock = pygame.time.Clock()
