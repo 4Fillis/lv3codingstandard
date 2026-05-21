@@ -18,16 +18,22 @@ class Game:
 
         #loading cloud img, png files reccomended
         self.img = pygame.image.load('pygamerescources\images\cloud.png')
+        #resizing cloud
+        width = self.img.get_rect().width
+        height = self.img.get_rect().height
+        self.img = pygame.transform.scale(self.img, (width*0.6, height*0.6))
 
         #cloud starting position
-        self.img_pos = [160, 260]
+        self.img_pos = [400, 260]
         #boolean for cloud movement, [upkey, downkey] <-- being held down
         self.movement = [False, False]
     def run(self):
         #infite loop
         while True:
-            #cloud movement using boolean --=> integer trick
-            self.img_pos[1] += self.movement[1] - self.movement[0]
+            #clearing screen
+            self.screen.fill((147, 47, 168))
+            #cloud movement using boolean --=> integer trick, mult for speed change
+            self.img_pos[1] += self.movement[1] - self.movement[0] * 5
             #using blit to add cloud to screen, top left is (0, 0)
             self.screen.blit(self.img, self.img_pos)
 
@@ -42,13 +48,14 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
                         self.movement[0] = True
-                    if event.key == pygame.K_DOWN:
-                        self.movement[1] == True
+                    #if event.key == pygame.K_DOWN:
+                    #    self.movement[1] == True
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_UP:
                         self.movement[0] = False
                     if event.key == pygame.K_DOWN:
                         self.movement[1] == False
+
 
             #function to keep screen on (otherwise goes black)
             pygame.display.update()
