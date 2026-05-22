@@ -24,7 +24,7 @@ class Game:
         self.img = pygame.transform.scale(self.img, (width*0.6, height*0.6))
 
         #cloud starting position
-        self.img_pos = [400, 260]
+        self.img_pos = [400, 200]
         #boolean for cloud movement, [upkey, downkey] <-- being held down
         self.movement = [False, False]
     def run(self):
@@ -33,7 +33,7 @@ class Game:
             #clearing screen
             self.screen.fill((147, 47, 168))
             #cloud movement using boolean --=> integer trick, mult for speed change
-            self.img_pos[1] += self.movement[1] - self.movement[0] * 5
+            self.img_pos[1] += (self.movement[0] - self.movement[1]) 
             #using blit to add cloud to screen, top left is (0, 0)
             self.screen.blit(self.img, self.img_pos)
 
@@ -45,16 +45,23 @@ class Game:
                     pygame.quit()
                     sys.exit()
                 #if user presses up/down keys
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_UP:
-                        self.movement[0] = True
-                    #if event.key == pygame.K_DOWN:
-                    #    self.movement[1] == True
-                if event.type == pygame.KEYUP:
-                    if event.key == pygame.K_UP:
-                        self.movement[0] = False
-                    if event.key == pygame.K_DOWN:
-                        self.movement[1] == False
+                if event.type == pygame.KEYDOWN: #key pressed
+                    print("key pressed")
+                    if event.key == pygame.K_DOWN: #up key pressed
+                        self.movement[0] = True  #up move = true
+                        print("down key pressed")
+                    if event.key == pygame.K_UP: #down key pressed
+                        self.movement[1] == True#
+                        self.img_pos[1] -= 10
+                        print("up key pressed")
+                if event.type == pygame.KEYUP: #key released
+                    if event.key == pygame.K_UP: #up key released
+                        self.movement[0] = False #stop moving up
+                        print("up key released")
+                    if event.key == pygame.K_DOWN: #down key released
+                        self.movement[1] == True #
+                        print("down key released")
+            
 
 
             #function to keep screen on (otherwise goes black)
