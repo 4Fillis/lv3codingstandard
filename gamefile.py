@@ -14,6 +14,9 @@ ypos = 100
 hght = 20
 wdth = 20
 
+#fancy pieces sprite variables
+x_stonel = 50
+y_stonel = 50
 
 #starting pygame
 pygame.init()
@@ -28,6 +31,7 @@ clock = pygame.time.Clock()
 
 rungame = True
 
+#infinite loop
 while rungame == True:
     #if the user quits the window
     for event in pygame.event.get():
@@ -35,7 +39,7 @@ while rungame == True:
             pygame.quit()
             sys.exit()
     
-    #Checking for move key inputs
+    #checking for move key inputs
     press = pygame.key.get_pressed()
     if press[pygame.K_UP]: ypos-=plyr_speed
     if press[pygame.K_DOWN]: ypos+=plyr_speed
@@ -43,9 +47,12 @@ while rungame == True:
     if press[pygame.K_RIGHT]: xpos+=plyr_speed
 
 
-    #drawing sprite
+    #drawing mc
     screen.fill(bg_clr) # Clear screen with black
-    pygame.draw.rect(screen, plyr_clr, (xpos, ypos, hght, wdth)) # Draw red square
+    pygame.draw.rect(screen, plyr_clr, (xpos, ypos, hght, wdth))
+    
+    pygame.draw.rect(screen, (0, 0, 0), (x_stonel, y_stonel, hght, wdth))
+    
     pygame.display.update()
 
     #fps to stop crashes
