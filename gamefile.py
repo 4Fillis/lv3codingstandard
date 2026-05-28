@@ -44,3 +44,5 @@ while rungame == True:
     pygame.display.update()
     # Control frame rate
     clock.tick(60)
+    #TEST
+    print("a")
