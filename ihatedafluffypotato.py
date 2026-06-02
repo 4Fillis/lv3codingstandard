@@ -1,62 +1,60 @@
-#Following DaFluffyPotato's yt coding tutorial
 import pygame
-import sys
-import time
 
-#making the game an object for OOP
-class Game:
-    def __init__(self):
-        #Initialising pygame
-        pygame.init()
+# Initialize Pygame constants
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
 
-        #window label
-        pygame.display.set_caption("hella sick game")
-        #creating window,      -      pixel resolution of the window
-        self.screen = pygame.display.set_mode((640, 480))
-        #clock for making game run at 60fps to avoid crashes
-        self.clock = pygame.time.Clock()
-        clock = pygame.time.Clock()
+class Player(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        """Initializes the player's texture, positioning, and speed metrics."""
+        super().__init__()
+        
+        # Create a simple placeholder square for the player texture
+        self.image = pygame.Surface((50, 50))
+        self.image.fill((0, 128, 255)) # Blue color
+        
+        # Pygame Rect handles positioning and collisions 
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+        
+        # Custom movement attributes
+        self.speed = 5
 
-        #loading sprite img, png files reccomended
-        self.img = pygame.image.load('pygamerescources\images\hannah.png')
-        #resizing sprite
-        width = self.img.get_rect().width
-        height = self.img.get_rect().height
-        self.img = pygame.transform.scale(self.img, (width*0.6, height*0.6))
+    def handle_input(self):
+        """Monitors real-time keystrokes to calculate player intentions."""
+        keys = pygame.key.get_pressed()
+        
+        self.velocity_x = 0
+        self.velocity_y = 0
+        
+        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+            self.velocity_x = -self.speed
+        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+            self.velocity_x = self.speed
+        if keys[pygame.K_UP] or keys[pygame.K_w]:
+            self.velocity_y = -self.speed
+        if keys[pygame.K_DOWN] or keys[pygame.K_s]:
+            self.velocity_y = self.speed
 
-        #sprite starting position
-        self.img_pos = [400, 200]
-    def run(self):
-        #movement speed
-        move = 5
-        while True:
-            #clearing screen
-            self.screen.fill((147, 47, 168))
-            #using blit to add sprite to screen, top left is (0, 0)
-            self.screen.blit(self.img, self.img_pos)
-            #Events
-            for event in pygame.event.get():
-                #if user quits the window
-                if event.type == pygame.QUIT:
-                    #closes pygame and exits the system
-                    pygame.quit()
-                    sys.exit()
-                #User movement Version 2.0
-            x = 0
-            y = 0
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_LEFT]:  x -= move
-            if keys[pygame.K_RIGHT]: x += move
-            if keys[pygame.K_UP]:    y -= move
-            if keys[pygame.K_DOWN]:  y += move
-            self.img_pos[0] += x
-            self.img_pos[1] += y
-            #using blit to add sprite to screen, top left is (0, 0)
-            self.screen.blit(self.img, self.img_pos)
-            #keep screen on (otherwise goes black)
-            pygame.display.update()
-            #making game run at 60fps
-            self.clock.tick(60)
+    def update(self):
+        """Updates the player state and ensures they stay within screen bounds."""
+        # Process keystroke updates first
+        self.handle_input()
+        
+        # Displace player location vector
+        self.rect.x += self.velocity_x
+        self.rect.y += self.velocity_y
+        
+        # Screen border containment checks
+        if self.rect.left < 0:
+            self.rect.left = 0
+        if self.rect.right > SCREEN_WIDTH:
+            self.rect.right = SCREEN_WIDTH
+        if self.rect.top < 0:
+            self.rect.top = 0
+        if self.rect.bottom > SCREEN_HEIGHT:
+            self.rect.bottom = SCREEN_HEIGHT
 
-#initialising game
-Game().run()
+    def draw(self, surface):
+        """Draws the player's texture onto the main active game window."""
+        surface.blit(self.image, self.rect)
