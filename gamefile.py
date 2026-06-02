@@ -27,11 +27,25 @@ screen.fill(bg_clr)
 #clock for making game run at 60fps to avoid crashes
 clock = pygame.time.Clock()
 
+#player character class
+class Plyr:
+    def __init__(self):
+        #loading sprite img, png files reccomended
+        self.img = pygame.image.load('pygamerescources\images\mc.png')
+        #resizing sprite
+        width = self.img.get_rect().width
+        height = self.img.get_rect().height
+        self.img = pygame.transform.scale(self.img, (int(width*0.4), int(height*0.4)))
 
+        self.xpos = 100
+        self.ypos = 100 
 
-rungame = True
+#creating the player sprite object
+plyr = Plyr()
+
 
 #infinite loop
+rungame = True
 while rungame == True:
     #if the user quits the window
     for event in pygame.event.get():
@@ -41,17 +55,18 @@ while rungame == True:
     
     #checking for move key inputs
     press = pygame.key.get_pressed()
-    if press[pygame.K_UP]: ypos-=plyr_speed
-    if press[pygame.K_DOWN]: ypos+=plyr_speed
-    if press[pygame.K_LEFT]: xpos-=plyr_speed
-    if press[pygame.K_RIGHT]: xpos+=plyr_speed
+    if press[pygame.K_UP]: plyr.ypos-=plyr_speed
+    if press[pygame.K_DOWN]: plyr.ypos+=plyr_speed
+    if press[pygame.K_LEFT]: plyr.xpos-=plyr_speed
+    if press[pygame.K_RIGHT]: plyr.xpos+=plyr_speed
 
+    #clearing screen
+    screen.fill(bg_clr)
+    #using blit to add sprite to screen, top left is (0, 0)
+    screen.blit(plyr.img, (plyr.xpos, plyr.ypos))
 
-    #drawing mc
-    screen.fill(bg_clr) # Clear screen with black
-    pygame.draw.rect(screen, plyr_clr, (xpos, ypos, hght, wdth))
-    
     pygame.draw.rect(screen, (0, 0, 0), (x_stonel, y_stonel, hght, wdth))
+    
     
     pygame.display.update()
 
