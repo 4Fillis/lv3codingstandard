@@ -43,6 +43,21 @@ class Plyr:
 #creating the player sprite object
 plyr = Plyr()
 
+#player character class
+class Treasure:
+    def __init__(self):
+        #loading sprite img, png files reccomended
+        self.img = pygame.image.load('pygamerescources\images\duck.webp')
+        #resizing sprite
+        width = self.img.get_rect().width
+        height = self.img.get_rect().height
+        self.img = pygame.transform.scale(self.img, (int(width*0.2), int(height*0.2)))
+
+        self.xpos = 50
+        self.ypos = 50 
+
+#creating the player sprite object
+rock1 = Treasure()
 
 #infinite loop
 rungame = True
@@ -62,10 +77,9 @@ while rungame == True:
 
     #clearing screen
     screen.fill(bg_clr)
-    #using blit to add sprite to screen, top left is (0, 0)
+    #using blit to add sprites to screen, top left is (0, 0)
     screen.blit(plyr.img, (plyr.xpos, plyr.ypos))
-
-    pygame.draw.rect(screen, (0, 0, 0), (x_stonel, y_stonel, hght, wdth))
+    screen.blit(rock1.img, (rock1.xpos, rock1.ypos))
     
     
     pygame.display.update()
