@@ -33,10 +33,11 @@ class Plyr:
         #loading sprite img, png files reccomended
         self.img = pygame.image.load('pygamerescources\images\mc.png')
         #resizing sprite
-        width = self.img.get_rect().width
-        height = self.img.get_rect().height
-        self.img = pygame.transform.scale(self.img, (int(width*0.4), int(height*0.4)))
-
+        scale = 0.3
+        n_width = int((self.img.get_rect().width)*scale)
+        n_height = int((self.img.get_rect().height)*scale)
+        self.img = pygame.transform.scale(self.img, (n_width, n_height))
+        self.hitbox = (n_width, n_height)
         self.xpos = 100
         self.ypos = 100 
 
@@ -75,6 +76,8 @@ while rungame == True:
     if press[pygame.K_LEFT]: plyr.xpos-=plyr_speed
     if press[pygame.K_RIGHT]: plyr.xpos+=plyr_speed
 
+    if (plyr.xpos == rock1.xpos) and (plyr.ypos == rock1.ypos):
+        print("hiihi\nhihi\n")
     #clearing screen
     screen.fill(bg_clr)
     #using blit to add sprites to screen, top left is (0, 0)
