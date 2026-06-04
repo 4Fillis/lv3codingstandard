@@ -1,6 +1,8 @@
 #Not following any tutorial, we go freelance
 import pygame
+from pygame.locals import *
 import sys
+from random import randint
 import time
 
 #color variables
@@ -49,6 +51,7 @@ class Treasure:
     def __init__(self):
         #loading sprite img, png files reccomended
         self.img = pygame.image.load('pygamerescources\images\duck.webp')
+        self.hb = self.img.get_rect()
         #resizing sprite
         width = self.img.get_rect().width
         height = self.img.get_rect().height
@@ -57,7 +60,12 @@ class Treasure:
         self.xpos = 50
         self.ypos = 50 
 
-#creating the player sprite object
+#creating the rocks sprite object
+rocks = []
+for i in range(3):
+    rock = Treasure()
+    rock_rect = pygame.Rect(randint(0, 500), randint(0, 500), 100, 100)
+    rocks.append(rock_rect)
 rock1 = Treasure()
 
 #infinite loop
@@ -69,6 +77,13 @@ while rungame == True:
             pygame.quit()
             sys.exit()
     
+    #checking for collisions
+    plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, 50, 50)
+    rock1_rect = pygame.Rect(rock1.xpos, rock1.ypos, 50, 50)
+    if plyr_rect.colliderect(rock_rect):
+        print("quack\nquack\n")
+        time.sleep(0.1)
+
     #checking for move key inputs
     press = pygame.key.get_pressed()
     if press[pygame.K_UP]: plyr.ypos-=plyr_speed
@@ -83,7 +98,9 @@ while rungame == True:
     #using blit to add sprites to screen, top left is (0, 0)
     screen.blit(plyr.img, (plyr.xpos, plyr.ypos))
     screen.blit(rock1.img, (rock1.xpos, rock1.ypos))
-    
+    for rock in rocks:
+        pygame.draw.rect(screen, plyr_clr, rock)
+
     
     pygame.display.update()
 
