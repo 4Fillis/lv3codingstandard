@@ -46,7 +46,7 @@ class Plyr:
 #creating the player sprite object
 plyr = Plyr()
 
-#player character class
+#special stones class
 class Treasure:
     def __init__(self):
         #loading sprite img, png files reccomended
@@ -60,13 +60,21 @@ class Treasure:
         self.xpos = 50
         self.ypos = 50 
 
+#player character class
+class Platform:
+    def __init__(self):
+
+        self.xpos = randint(0, 500)
+        self.ypos = randint(0, 500) 
+        self.pos = [self.xpos, self.ypos]
+
 #creating the rocks sprite object
 rocks = []
-for i in range(3):
-    rock = Treasure()
-    rock_rect = pygame.Rect(randint(0, 500), randint(0, 500), 100, 100)
+for i in range(4):
+    rock = Platform()
+    rock_rect = pygame.Rect(rock.xpos, rock.ypos, 100, 100)
     rocks.append(rock_rect)
-rock1 = Treasure()
+    rockypos = [rock.ypos]
 
 #infinite loop
 rungame = True
@@ -79,25 +87,26 @@ while rungame == True:
     
     #checking for collisions
     plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, 50, 50)
-    rock1_rect = pygame.Rect(rock1.xpos, rock1.ypos, 50, 50)
-    if plyr_rect.colliderect(rock_rect):
-        print("quack\nquack\n")
-        time.sleep(0.1)
+    for rock in rocks:
+        if plyr_rect.colliderect(rock):
+            print("quack\nquack\n")
+            #if plyr.ypos > (int(rockypos[0])+25):
+            #    print("ypos")
+            #    plyr.ypos-=plyr_speed
+            #    time.sleep(0.1)
 
     #checking for move key inputs
     press = pygame.key.get_pressed()
     if press[pygame.K_UP]: plyr.ypos-=plyr_speed
-    if press[pygame.K_DOWN]: plyr.ypos+=plyr_speed
+    if (press[pygame.K_DOWN]) and (plyr.ypos > (int(rockypos[0])+25)): 
+        plyr.ypos+=plyr_speed
     if press[pygame.K_LEFT]: plyr.xpos-=plyr_speed
     if press[pygame.K_RIGHT]: plyr.xpos+=plyr_speed
 
-    if (plyr.xpos == rock1.xpos) and (plyr.ypos == rock1.ypos):
-        print("hiihi\nhihi\n")
     #clearing screen
     screen.fill(bg_clr)
     #using blit to add sprites to screen, top left is (0, 0)
     screen.blit(plyr.img, (plyr.xpos, plyr.ypos))
-    screen.blit(rock1.img, (rock1.xpos, rock1.ypos))
     for rock in rocks:
         pygame.draw.rect(screen, plyr_clr, rock)
 
