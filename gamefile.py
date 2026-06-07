@@ -3,7 +3,10 @@ import pygame
 from pygame.locals import *
 import sys
 from random import randint
-import time
+from time import sleep
+
+#SQL libraries import
+import sqlite3
 
 #color variables
 bg_clr = (251, 247, 215)
@@ -19,6 +22,58 @@ wdth = 20
 #fancy pieces sprite variables
 x_stonel = 50
 y_stonel = 50
+
+#opens db connection or creates one
+conn = sqlite3.connect("objects.db")
+#creating cursor
+cursor = conn.cursor()
+#creating databases for game use
+if True:
+    #silly data structures time
+    cursor.executescript('''
+    DROP TABLE IF EXISTS Room;
+    DROP TABLE IF EXISTS Objects;
+    CREATE TABLE Room(
+    RoomID INTEGER NOT NULL,
+    RoomName TEXT NOT NULL,
+    PRIMARY KEY(RoomID)
+    );
+
+    INSERT INTO Room(RoomID, RoomName) VALUES
+    (1,"Stairs"), 
+    (2,"PC Room"), 
+    (3,"Barn"),
+    (4,"Kitchen");
+
+    CREATE TABLE Objects(
+    ObjectID NUMERIC NOT NULL,
+    ObjectName NUMERIC NOT NULL,
+    RoomID INTEGER,
+    FOREIGN KEY(RoomID) REFERENCES Room(RoomID),
+    PRIMARY KEY(ObjectID)
+    );
+
+    INSERT INTO Objects(ObjectID, ObjectName, RoomID) VALUES
+    (15001,"Fluffy Rug",2),
+    (15002,"Necklace",2),
+    (15003, "Bed",2),
+    (15004,"Table",4),
+    (15005,"Waffles",4),
+    (15006,"Clock",2),
+    (15007,"Hay",NULL),
+    (15008,"Hay",3),
+    (15009,"Sink",4),
+    (15010,"Water trough",3);
+
+    ''')
+    #getting objects in PC Room
+    cursor.execute("SELECT * FROM Objects WHERE RoomID = 2")
+
+    result = cursor.fetchall()
+    for row in result:
+        print(row)
+
+
 
 #starting pygame
 pygame.init()
@@ -77,7 +132,7 @@ for i in range(4):
     rockypos = [rock.ypos]
 
 #infinite loop
-rungame = True
+rungame = False
 while rungame == True:
     #if the user quits the window
     for event in pygame.event.get():
@@ -90,15 +145,15 @@ while rungame == True:
     for rock in rocks:
         if plyr_rect.colliderect(rock):
             print("quack\nquack\n")
-            #if plyr.ypos > (int(rockypos[0])+25):
-            #    print("ypos")
-            #    plyr.ypos-=plyr_speed
-            #    time.sleep(0.1)
+            if plyr.ypos > (int(rockypos[0])+25):
+                print("ypos")
+                plyr.ypos-=plyr_speed
+                sleep(0.1)
 
     #checking for move key inputs
     press = pygame.key.get_pressed()
     if press[pygame.K_UP]: plyr.ypos-=plyr_speed
-    if (press[pygame.K_DOWN]) and (plyr.ypos > (int(rockypos[0])+25)): 
+    if (press[pygame.K_DOWN]): 
         plyr.ypos+=plyr_speed
     if press[pygame.K_LEFT]: plyr.xpos-=plyr_speed
     if press[pygame.K_RIGHT]: plyr.xpos+=plyr_speed
