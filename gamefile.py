@@ -28,7 +28,8 @@ conn = sqlite3.connect("objects.db")
 #creating cursor
 cursor = conn.cursor()
 #creating databases for game use
-if True:
+rundb = False
+if rundb:
     #silly data structures time
     cursor.executescript('''
     DROP TABLE IF EXISTS Room;
@@ -123,16 +124,40 @@ class Platform:
         self.ypos = randint(0, 500) 
         self.pos = [self.xpos, self.ypos]
 
+#Rock pos dict for collision checking
+rocks_pos = {
+    "lwrypos" : [],
+    "lwrxpos" : [],
+    
+    "uprypos" : [],
+    "uprxpos" : [],
+
+    "airypos" : [],
+    "airxpos" : [],
+}
+createrocks = {
+    "lwr": ["gnd", 1, 2, 3],
+    "upr": [],
+    "air": []
+}
+for key in createrocks:
+    #finding the total amt of rocks
+    gnditems = createrocks[key]
+    if not gnditems:
+        gnditems = ["air", 1]
+    gnditems = gnditems.pop(0)
+    pcenttotal = sum(gnditems)
 #creating the rocks sprite object
+#coords wise: for x amt of 
 rocks = []
-for i in range(4):
+for i in range(6):
     rock = Platform()
-    rock_rect = pygame.Rect(rock.xpos, rock.ypos, 100, 100)
+    rock_rect = pygame.Rect(rock.xpos, rock.ypos, 50, 50)
     rocks.append(rock_rect)
     rockypos = [rock.ypos]
 
 #infinite loop
-rungame = False
+rungame = True
 while rungame == True:
     #if the user quits the window
     for event in pygame.event.get():
@@ -144,11 +169,9 @@ while rungame == True:
     plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, 50, 50)
     for rock in rocks:
         if plyr_rect.colliderect(rock):
-            print("quack\nquack\n")
-            if plyr.ypos > (int(rockypos[0])+25):
-                print("ypos")
-                plyr.ypos-=plyr_speed
-                sleep(0.1)
+            #print("quack\nquack\n")
+            if ((plyr.ypos-10) < (rock.pos[1] + 25)) and (plyr.ypos+10) > (rockypos[1] - 25):
+                print("in block\n")
 
     #checking for move key inputs
     press = pygame.key.get_pressed()
