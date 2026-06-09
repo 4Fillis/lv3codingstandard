@@ -10,7 +10,10 @@ import sqlite3
 
 #color variables
 bg_clr = (251, 247, 215)
-plyr_clr = (254, 200, 216)
+plyr_clr = (160, 117, 230)
+gnd_clr = (254, 200, 216)
+lva_clr = (212, 50, 0)
+wtr_clr = (15, 182, 212)
 
 #main sprite variables
 plyr_speed = 5
@@ -80,7 +83,9 @@ if rundb:
 pygame.init()
 #creating window
 pygame.display.set_caption("hella sick game")
-screen = pygame.display.set_mode((640, 480))
+screen_width = 640
+screen_height = 480
+screen = pygame.display.set_mode((screen_width, screen_height))
 screen.fill(bg_clr)
 #clock for making game run at 60fps to avoid crashes
 clock = pygame.time.Clock()
@@ -135,28 +140,52 @@ rocks_pos = {
     "airypos" : [],
     "airxpos" : [],
 }
+#platform arrangement dict, 
+#coords are 1st list item, start type & % of screen width 2nd list item
 createrocks = {
-    "lwr": ["gnd", 1, 2, 3],
-    "upr": [],
+    "lwr": [[10, 150], ["gnd", 1, 2, 3, 1, 2]],
+    "upr": [[30, 10], ["gnd", 2, 0, 3, 0, 5, 0, 1]],
     "air": []
 }
+#dict for attributes of gnd types
+#rendered y/n, color
+gndtypes = {
+    "air": [False, "no"],
+    "gnd": [True, gnd_clr],
+    "lava": [True, lva_clr],
+    "water": [True, wtr_clr]
+}
+rocks = []
+platwidth = 0
 for key in createrocks:
     #finding the total amt of rocks
-    gnditems = createrocks[key]
-    if not gnditems:
-        gnditems = ["air", 1]
-    gnditems = gnditems.pop(0)
-    pcenttotal = sum(gnditems)
-#creating the rocks sprite object
-#coords wise: for x amt of 
-rocks = []
-for i in range(6):
-    rock = Platform()
-    rock_rect = pygame.Rect(rock.xpos, rock.ypos, 50, 50)
-    rocks.append(rock_rect)
-    rockypos = [rock.ypos]
+    if not createrocks[key]:
+        createrocks[key] = [[0, 0], ["air", 1]]
+    print(f"1 {key} {createrocks[key][1]}")
+    platforms = createrocks[key][1]
+    print(platforms)
+    gndtype = platforms[0]
+    del platforms[0]
+    print(platforms)
+    print(gndtype)
+    #finding how long each platform is
+    lenplatform = sum(platforms) / len(platforms)
+    for x in platforms:
+        if gndtypes[gndtype][0] == True:
+            rock = Platform()
+            #creates platform at the end of the previous platform
+            xpos = createrocks[key][0][0] + platwidth
+            ypos = createrocks[key][0][1]
+            platwidth = (screen_width/sum(platforms))*x
+            rock_rect = pygame.Rect(xpos, ypos, platwidth, 50)
+            rocks.append(rock_rect)
+            rockypos = [rock.ypos]
+        elif gndtypes[gndtype][0] == False:
+            xpos = createrocks[key][0][0] + platwidth
+            platwidth = (screen_width/sum(platforms))*x
 
-#infinite loop
+
+#game loop
 rungame = True
 while rungame == True:
     #if the user quits the window
@@ -186,7 +215,7 @@ while rungame == True:
     #using blit to add sprites to screen, top left is (0, 0)
     screen.blit(plyr.img, (plyr.xpos, plyr.ypos))
     for rock in rocks:
-        pygame.draw.rect(screen, plyr_clr, rock)
+        pygame.draw.rect(screen, gnd_clr, rock)
 
     
     pygame.display.update()
