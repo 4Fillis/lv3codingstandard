@@ -101,8 +101,8 @@ class Plyr:
         n_height = int((self.img.get_rect().height)*scale)
         self.img = pygame.transform.scale(self.img, (n_width, n_height))
         self.hitbox = (n_width, n_height)
-        self.xpos = 100
-        self.ypos = 100 
+        self.xpos = 30
+        self.ypos = 300 
 
 #creating the player sprite object
 plyr = Plyr()
@@ -129,6 +129,7 @@ class Platform:
         self.ypos = randint(0, 500) 
         self.pos = [self.xpos, self.ypos]
 
+
 #Rock pos dict for collision checking
 rocks_pos = {
     "lwrypos" : [],
@@ -143,9 +144,9 @@ rocks_pos = {
 #platform arrangement dict, 
 #coords are 1st list item, start type & % of screen width 2nd list item
 createrocks = {
-    "lwr": [[10, 150], ["gnd", 1, 2, 3, 1, 2]],
-    "upr": [[30, 10], ["gnd", 2, 0, 3, 0, 5, 0, 1]],
-    "air": []
+    "lwr": [[0, 250], ["gnd", 1, 2, 3, 4, 5]],
+    "upr": [[0, 100], ["gnd", 1, 1]],
+    #"air": [[0, 30], ["air", 3, 1, 2]]
 }
 #dict for attributes of gnd types
 #rendered y/n, color
@@ -157,32 +158,33 @@ gndtypes = {
 }
 rocks = []
 platwidth = 0
+print("hihi\n")
 for key in createrocks:
     #finding the total amt of rocks
     if not createrocks[key]:
         createrocks[key] = [[0, 0], ["air", 1]]
-    print(f"1 {key} {createrocks[key][1]}")
     platforms = createrocks[key][1]
-    print(platforms)
     gndtype = platforms[0]
     del platforms[0]
-    print(platforms)
-    print(gndtype)
     #finding how long each platform is
     lenplatform = sum(platforms) / len(platforms)
     for x in platforms:
         if gndtypes[gndtype][0] == True:
             rock = Platform()
             #creates platform at the end of the previous platform
-            xpos = createrocks[key][0][0] + platwidth
+            platwidth = int(screen_width/sum(platforms))*x
+            print(f"xpos b4 xpos set {xpos}")
+            xpos = xpos + createrocks[key][0][0] + platwidth
+            print(f"xpos {xpos}")
             ypos = createrocks[key][0][1]
-            platwidth = (screen_width/sum(platforms))*x
             rock_rect = pygame.Rect(xpos, ypos, platwidth, 50)
             rocks.append(rock_rect)
             rockypos = [rock.ypos]
         elif gndtypes[gndtype][0] == False:
             xpos = createrocks[key][0][0] + platwidth
             platwidth = (screen_width/sum(platforms))*x
+    print("lvldone")
+    xpos = 0
 
 
 #game loop
@@ -215,7 +217,7 @@ while rungame == True:
     #using blit to add sprites to screen, top left is (0, 0)
     screen.blit(plyr.img, (plyr.xpos, plyr.ypos))
     for rock in rocks:
-        pygame.draw.rect(screen, gnd_clr, rock)
+        pygame.draw.rect(screen, plyr_clr, rock)
 
     
     pygame.display.update()
