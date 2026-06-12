@@ -166,25 +166,37 @@ for key in createrocks:
     if not createrocks[key]:
         createrocks[key] = [[0, 0], ["air", 1]]
     platforms = createrocks[key][1]
-    gndtype = platforms[0]
+    starttype = platforms[0]
     del platforms[0]
     #finding how long each platform is
     lenplatform = sum(platforms) / len(platforms)
     for x in platforms:
         xpos += createrocks[key][0][0] 
-        print(f"x. {x}, {gndtypes[gndtype][0]} ")
+        print(f"x. {x}, {gndtypes[starttype][0]} ")
         #listing air/ground ratios
         rendergnds = createrocks[key][1][::2]
         renderair = platforms[::2]
+        platx = int(screen_width/sum(platforms))
 
-        
-        if gndtypes[gndtype][0] == True:
+        #if the lvl starts with air:
+        #skip platform generation and move the cursor the platform width over
+        if (x == 0) and starttype == "air":
+            platwidth = (screen_width/sum(platforms))*x
+            xpos = xpos + createrocks[key][0][0] + platwidth
+        for i in range(len(renderair)+len(rendergnds)):
+
+
+
+
+
+
+        if gndtypes[starttype][0] == True:
             rock = Platform()
             rendergnds = createrocks[key][1][::2]
             print(f"rendergnds {rendergnds}")
             print(f"rendergnds {platforms}")
             #creates platform at the end of the previous platform
-            platwidth = int((screen_width/(sum(platforms)+doneplats)))*platforms[0]
+            platwidth = int(screen_width/sum(platforms))*platforms[0]
             doneplats += platforms[0]
             print(f"platwidth {[platwidth]}")
             print(f"xpos {xpos}")
@@ -193,7 +205,7 @@ for key in createrocks:
             xpos += + platwidth
             rocks.append(rock_rect)
             rockypos = [rock.ypos]
-        elif gndtypes[gndtype][0] == False:
+        elif gndtypes[starttype][0] == False:
             platwidth = (screen_width/sum(platforms))*x
             xpos = xpos + createrocks[key][0][0] + platwidth
     print("lvldone")
