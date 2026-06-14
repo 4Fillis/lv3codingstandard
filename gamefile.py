@@ -183,23 +183,22 @@ for key in createrocks:
         if (x == 0) and starttype == "air":
             platwidth = (screen_width/sum(platforms))*x
             xpos = xpos + createrocks[key][0][0] + platwidth
+        #for the amt of platforms, generate a gnd then air slab
         for i in range(len(renderair)+len(rendergnds)):
+            rock = Platform()
+            platwidth = platx*rendergnds[0]
+            rendergnds.pop(0)
 
-
-
+            #'generating' the air slabs
+            xpos += platwidth + platx*renderair[0]
 
 
 
         if gndtypes[starttype][0] == True:
-            rock = Platform()
-            rendergnds = createrocks[key][1][::2]
-            print(f"rendergnds {rendergnds}")
-            print(f"rendergnds {platforms}")
+            
+            
             #creates platform at the end of the previous platform
-            platwidth = int(screen_width/sum(platforms))*platforms[0]
-            doneplats += platforms[0]
-            print(f"platwidth {[platwidth]}")
-            print(f"xpos {xpos}")
+            
             ypos = createrocks[key][0][1]
             rock_rect = pygame.Rect(xpos, ypos, platwidth, 50)
             xpos += + platwidth
