@@ -100,9 +100,9 @@ class Plyr:
         n_width = int((self.img.get_rect().width)*scale)
         n_height = int((self.img.get_rect().height)*scale)
         self.img = pygame.transform.scale(self.img, (n_width, n_height))
-        self.hitbox = (n_width, n_height)
         self.xpos = 30
         self.ypos = 0 
+        #self.rect = pygame.Rect(self.xpos, self.ypos, n_width, n_height)
 
 #creating the player sprite object
 plyr = Plyr()
@@ -141,13 +141,16 @@ rocks_pos = {
     "airypos" : [],
     "airxpos" : [],
 }
+
 #platform arrangement dict, 
-#coords are 1st list item, start type & % of screen width 2nd list item
+#start coords are 1st list item, start type & % of screen width is the 2nd list item
 createrocks = {
     "lwr": [[1, 400], ["gnd", 1, 2, 3, 4, 5]],
     "upr": [[1, 100], ["gnd", 1, 1, 1, 1]],
     "air": [[1, 250], ["air", 1, 2, 3, 4, 5]]
 }
+
+
 #dict for attributes of gnd types
 #rendered y/n, color
 gndtypes = {
@@ -157,72 +160,74 @@ gndtypes = {
     "water": [True, wtr_clr]
 }
 
+
 rocks = []
-platwidth = 0
-doneplats = 0
-xpos = 0
-
-for key in createrocks:
-    #finding the total amt of platforms
-    #avoiding empty errors by turning empty lvls into just air
-    if not createrocks[key]:
-        createrocks[key] = [[0, 0], ["air", 1]]
-    platforms = createrocks[key][1]
-    if platforms[0] == "air":
-        platforms.insert(1, 0)
-    print("platofrms 0")
-    print(platforms[0])
-    #finding how long each platform is
-    #each levels y position
-    ypos = createrocks[key][0][1]
-    for x in range(1):
-        xpos += createrocks[key][0][0] 
-        #totalpcent is the same as platforms without the starttype
-        totalpcent = createrocks[key][1]
-        print("platofrms 1")
-        print(platforms[0])
-        totalpcent.pop(0)
-            
-        print("platforms/totalpcent 1")
-        print(platforms[0])
-        print(totalpcent)
-        platx = int(screen_width/sum(totalpcent))
-        
-        platforms = createrocks[key][1]
-        print("platforms/totalpcent 2")
-        print(platforms[0])
-        print(totalpcent)
-
-        #if the lvl starts with air:
-        #skip platform generation and move the cursor the platform width over
-        print(f"platforms  b4 air check {[platforms]}")
-        print(platforms[0])
-
-        #listing air/ground ratios
-        rendergnds = platforms[::2]
-        #remove the start type so every 2nd one is air
-        platforms.pop(0)
-        renderair = platforms[::2]
-
-        #for the amt of platforms, generate a gnd then air slab
-        for i in range(len(renderair)+len(rendergnds)):
-            #creating slab section if it should exist
-            if len(rendergnds) > 0:
-                print(f"rendergnds2 {rendergnds}")
-                platwidth = platx*rendergnds[0]
-                rock = Platform()
-                rock_rect = pygame.Rect(xpos, ypos, platwidth, 50)
-                rocks.append(rock_rect)
-                rendergnds.pop(0)
-            if len(renderair) > 0:
-                #'generating' the air slab
-                xpos += platwidth + platx*renderair[0]
-                renderair.pop(0)
-    print("lvldone")
-    #resetting xpos to LHS of screen
+def draw_lvl(rocks):
+    #variables/lists needed
+    platwidth = 0
     xpos = 0
+    #for each height of platforms specified in the lvl
+    for key in createrocks:
+        #finding the total amt of platforms
+        #avoiding empty errors by turning empty lvls into just air
+        if not createrocks[key]:
+            createrocks[key] = [[0, 0], ["air", 1]]
+        platforms = createrocks[key][1]
+        if platforms[0] == "air":
+            platforms.insert(1, 0)
+        print("platofrms 0")
+        print(platforms[0])
+        #finding how long each platform is
+        #each levels y position
+        ypos = createrocks[key][0][1]
+        for x in range(1):
+            xpos += createrocks[key][0][0] 
+            #totalpcent is the same as platforms without the starttype
+            totalpcent = createrocks[key][1]
+            print("platofrms 1")
+            print(platforms[0])
+            totalpcent.pop(0)
+                
+            print("platforms/totalpcent 1")
+            print(platforms[0])
+            print(totalpcent)
+            platx = int(screen_width/sum(totalpcent))
+            
+            platforms = createrocks[key][1]
+            print("platforms/totalpcent 2")
+            print(platforms[0])
+            print(totalpcent)
 
+            #if the lvl starts with air:
+            #skip platform generation and move the cursor the platform width over
+            print(f"platforms  b4 air check {[platforms]}")
+            print(platforms[0])
 
+            #listing air/ground ratios
+            rendergnds = platforms[::2]
+            #remove the start type so every 2nd one is air
+            platforms.pop(0)
+            renderair = platforms[::2]
+
+            #for the amt of platforms, generate a gnd then air slab
+            for i in range(len(renderair)+len(rendergnds)):
+                #creating slab section if it should exist
+                if len(rendergnds) > 0:
+                    print(f"rendergnds2 {rendergnds}")
+                    platwidth = platx*rendergnds[0]
+                    rock = Platform()
+                    rock_rect = pygame.Rect(xpos, ypos, platwidth, 50)
+                    rocks.append(rock_rect)
+                    rendergnds.pop(0)
+                if len(renderair) > 0:
+                    #'generating' the air slab
+                    xpos += platwidth + platx*renderair[0]
+                    renderair.pop(0)
+        #resetting xpos to LHS of screen
+        xpos = 0
+    return(rocks)
+
+draw_lvl(rocks)
 #game loop
 rungame = True
 while rungame == True:
@@ -236,9 +241,11 @@ while rungame == True:
     plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, 50, 50)
     for rock in rocks:
         if plyr_rect.colliderect(rock):
-            #print("quack\nquack\n")
-            if ((plyr.ypos-10) < (rock.pos[1] + 25)) and (plyr.ypos+10) > (rockypos[1] - 25):
-                print("in block\n")
+            #topcheck
+            print(rock.top)
+            print(f"rock {rock}")
+            if plyr_rect.bottom >= rock.top:
+                print("quack\nquack\n")
 
     #checking for move key inputs
     press = pygame.key.get_pressed()
