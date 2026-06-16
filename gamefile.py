@@ -146,7 +146,7 @@ rocks_pos = {
 createrocks = {
     "lwr": [[1, 400], ["gnd", 1, 2, 3, 4, 5]],
     "upr": [[1, 100], ["gnd", 1, 1, 1, 1]],
-    #"air": [[1, 250], ["air", 1, 3, 2]]
+    "air": [[1, 250], ["air", 1, 2, 3, 4, 5]]
 }
 #dict for attributes of gnd types
 #rendered y/n, color
@@ -156,39 +156,54 @@ gndtypes = {
     "lava": [True, lva_clr],
     "water": [True, wtr_clr]
 }
+
 rocks = []
 platwidth = 0
 doneplats = 0
 xpos = 0
-print("hihi\n")
-print(f"lencreate rocks {len(createrocks)}")
+
 for key in createrocks:
     #finding the total amt of platforms
     #avoiding empty errors by turning empty lvls into just air
     if not createrocks[key]:
         createrocks[key] = [[0, 0], ["air", 1]]
     platforms = createrocks[key][1]
-    #deleting the ground start type
-    platforms.pop(0)
+    if platforms[0] == "air":
+        platforms.insert(1, 0)
+    print("platofrms 0")
+    print(platforms[0])
     #finding how long each platform is
-    lenplatform = sum(platforms) / len(platforms)
     #each levels y position
     ypos = createrocks[key][0][1]
-    print(f"lenplatforms {len(platforms)}")
     for x in range(1):
         xpos += createrocks[key][0][0] 
-        #listing air/ground ratios
-        rendergnds = createrocks[key][1][::2]
-        renderair = platforms[::2]
-        print(f"rendergnds {rendergnds}")
-        print(f"renderair {renderair}")
-        platx = int(screen_width/sum(platforms))
+        #totalpcent is the same as platforms without the starttype
+        totalpcent = createrocks[key][1]
+        print("platofrms 1")
+        print(platforms[0])
+        totalpcent.pop(0)
+            
+        print("platforms/totalpcent 1")
+        print(platforms[0])
+        print(totalpcent)
+        platx = int(screen_width/sum(totalpcent))
+        
+        platforms = createrocks[key][1]
+        print("platforms/totalpcent 2")
+        print(platforms[0])
+        print(totalpcent)
 
         #if the lvl starts with air:
         #skip platform generation and move the cursor the platform width over
-        if (x == 0) and platforms[0] == "air":
-            platwidth = platx*x
-            xpos += (createrocks[key][0][0] + platwidth)
+        print(f"platforms  b4 air check {[platforms]}")
+        print(platforms[0])
+
+        #listing air/ground ratios
+        rendergnds = platforms[::2]
+        #remove the start type so every 2nd one is air
+        platforms.pop(0)
+        renderair = platforms[::2]
+
         #for the amt of platforms, generate a gnd then air slab
         for i in range(len(renderair)+len(rendergnds)):
             #creating slab section if it should exist
