@@ -144,9 +144,9 @@ rocks_pos = {
 #platform arrangement dict, 
 #coords are 1st list item, start type & % of screen width 2nd list item
 createrocks = {
-    "lwr": [[0, 400], ["gnd", 1, 2, 3, 4, 5]],
-    #"upr": [[0, 100], ["gnd", 1, 1, 1, 1]],
-    #"air": [[0, 250], ["gnd", 1, 3, 2]]
+    "lwr": [[1, 400], ["gnd", 1, 2, 3, 4, 5]],
+    "upr": [[1, 100], ["gnd", 1, 1, 1, 1]],
+    #"air": [[1, 250], ["air", 1, 3, 2]]
 }
 #dict for attributes of gnd types
 #rendered y/n, color
@@ -161,52 +161,48 @@ platwidth = 0
 doneplats = 0
 xpos = 0
 print("hihi\n")
+print(f"lencreate rocks {len(createrocks)}")
 for key in createrocks:
-    #finding the total amt of rocks
+    #finding the total amt of platforms
+    #avoiding empty errors by turning empty lvls into just air
     if not createrocks[key]:
         createrocks[key] = [[0, 0], ["air", 1]]
     platforms = createrocks[key][1]
-    starttype = platforms[0]
-    del platforms[0]
+    #deleting the ground start type
+    platforms.pop(0)
     #finding how long each platform is
     lenplatform = sum(platforms) / len(platforms)
-    for x in platforms:
+    #each levels y position
+    ypos = createrocks[key][0][1]
+    print(f"lenplatforms {len(platforms)}")
+    for x in range(1):
         xpos += createrocks[key][0][0] 
-        print(f"x. {x}, {gndtypes[starttype][0]} ")
         #listing air/ground ratios
         rendergnds = createrocks[key][1][::2]
         renderair = platforms[::2]
+        print(f"rendergnds {rendergnds}")
+        print(f"renderair {renderair}")
         platx = int(screen_width/sum(platforms))
 
         #if the lvl starts with air:
         #skip platform generation and move the cursor the platform width over
-        if (x == 0) and starttype == "air":
-            platwidth = (screen_width/sum(platforms))*x
-            xpos = xpos + createrocks[key][0][0] + platwidth
+        if (x == 0) and platforms[0] == "air":
+            platwidth = platx*x
+            xpos += (createrocks[key][0][0] + platwidth)
         #for the amt of platforms, generate a gnd then air slab
         for i in range(len(renderair)+len(rendergnds)):
-            rock = Platform()
-            platwidth = platx*rendergnds[0]
-            rendergnds.pop(0)
-
-            #'generating' the air slabs
-            xpos += platwidth + platx*renderair[0]
-
-
-
-        if gndtypes[starttype][0] == True:
-            
-            
-            #creates platform at the end of the previous platform
-            
-            ypos = createrocks[key][0][1]
-            rock_rect = pygame.Rect(xpos, ypos, platwidth, 50)
-            xpos += + platwidth
-            rocks.append(rock_rect)
-            rockypos = [rock.ypos]
-        elif gndtypes[starttype][0] == False:
-            platwidth = (screen_width/sum(platforms))*x
-            xpos = xpos + createrocks[key][0][0] + platwidth
+            #creating slab section if it should exist
+            if len(rendergnds) > 0:
+                print(f"rendergnds2 {rendergnds}")
+                platwidth = platx*rendergnds[0]
+                rock = Platform()
+                rock_rect = pygame.Rect(xpos, ypos, platwidth, 50)
+                rocks.append(rock_rect)
+                rendergnds.pop(0)
+            if len(renderair) > 0:
+                #'generating' the air slab
+                xpos += platwidth + platx*renderair[0]
+                renderair.pop(0)
     print("lvldone")
     #resetting xpos to LHS of screen
     xpos = 0
