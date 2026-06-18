@@ -230,6 +230,7 @@ def draw_lvl(rocks):
 draw_lvl(rocks)
 #game loop
 rungame = True
+falling = True
 while rungame == True:
     #if the user quits the window
     for event in pygame.event.get():
@@ -237,24 +238,32 @@ while rungame == True:
             pygame.quit()
             sys.exit()
     
-    #checking for collisions
-    plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, 50, 50)
-    for rock in rocks:
-        if plyr_rect.colliderect(rock):
-            #topcheck
-            print(rock.top)
-            print(f"rock {rock}")
-            if plyr_rect.bottom >= rock.top:
-                print("quack\nquack\n")
-
     #checking for move key inputs
     press = pygame.key.get_pressed()
-    if press[pygame.K_UP]: plyr.ypos-=plyr_speed
+    if press[pygame.K_UP]: 
+        plyr.ypos-=plyr_speed
+        fallling = True
     if (press[pygame.K_DOWN]): 
         plyr.ypos+=plyr_speed
     if press[pygame.K_LEFT]: plyr.xpos-=plyr_speed
     if press[pygame.K_RIGHT]: plyr.xpos+=plyr_speed
 
+    if falling == True:
+        plyr.ypos += plyr_speed
+    #checking for collisions
+    plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, 45, 45)
+    for rock in rocks:
+        if plyr_rect.colliderect(rock):
+
+            if (plyr.xpos > (rock.left)) and (plyr.xpos < (rock.right)) and (plyr.ypos < rock.top):
+                print("Top collision")
+                falling = False
+            else:
+                falling = True
+                plyr.ypos += plyr_speed
+            #topcheck
+            print(f"rock {rock}")
+            
     #clearing screen
     screen.fill(bg_clr)
     #using blit to add sprites to screen, top left is (0, 0)
