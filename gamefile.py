@@ -4,6 +4,7 @@ from pygame.locals import *
 import sys
 from random import randint
 from time import sleep
+from pathlib import Path
 
 #SQL libraries import
 import sqlite3
@@ -26,6 +27,11 @@ wdth = 20
 x_stonel = 50
 y_stonel = 50
 
+#creating a file if it doesnt already exist
+file_path = Path("file.txt")
+if file_path.is_file():
+    print("file already exists")
+    
 #opens db connection or creates one
 conn = sqlite3.connect("objects.db")
 #creating cursor
@@ -249,36 +255,34 @@ while rungame == True:
         #    up-down-left-right
         cols = [0, 0, 0, 0]
         if plyr_rect.colliderect(rock):
-            #if the plyr is in the blocks x range and is higher than the rocks top
+            #if the plyr is in the blocks x range and is higher than the rocks top. i.e a on a platform
             if (plyr.xpos > rock.left) and (plyr.xpos < rock.right) and (plyr.ypos < rock.top):
-                print("Top collision")
                 cols[0] = True
                 falling = False
-            #if the player is in the blocks x range and is below the bottom
-            elif (plyr.xpos > (rock.left)) and (plyr.xpos < (rock.right)) and (plyr.ypos < rock.bottom):
-                print("Bottom collision")
+            #if the player is in the blocks x range and is c
+            elif (plyr.xpos > (rock.left)) and (plyr.xpos < (rock.right)) and (plyr.ypos < rock.top):
+                print("Bottom")
                 falling = True
                 cols[1] = True
             #if the player hits the RHS of a block
-            if (plyr.xpos > rock.left):
-                print("LHS collision")
+            elif (plyr.xpos > rock.left):
+                print("LHS")
                 cols[2] = True
                 #plyr.xpos = rock.left - 40
                 #plyr.xpos -= plyr_speed
             #if the player hits the LHS of a block
-            if (plyr.xpos < rock.right) and :
-                print("RHS collision")
+            elif (plyr.xpos < rock.right) and (plyr.xpos > (rock.left + 25)):
+                print("RHS")
                 cols[3] = True
                 falling = True
                 #plyr.xpos = rock.right + 40
                 #plyr.xpos += plyr_speed
             else:
-                falling = True
-                #setting all collisons to be False
+                #setting all collisions to false
                 for col in cols:
                     cols[col] = False
             #topcheck
-            print(f"rock {rock}")
+            #print(f"rock {rock}")
     #checking for move key inputs
     press = pygame.key.get_pressed()
     if (press[pygame.K_UP]) and (falling == False) and (cols[1] == False): 
@@ -289,7 +293,10 @@ while rungame == True:
         plyr.xpos-=plyr_speed
     if (press[pygame.K_RIGHT]) and (cols[3] == False):
          plyr.xpos+=plyr_speed
-            
+    if cols[0]  == True:
+        falling = False 
+    else:
+        falling = True
     #clearing screen
     screen.fill(bg_clr)
     #using blit to add sprites to screen, top left is (0, 0)
