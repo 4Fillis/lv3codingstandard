@@ -4,7 +4,7 @@ from pygame.locals import *
 import sys
 from random import randint
 from time import sleep
-from pathlib import Path
+import os
 
 #SQL libraries import
 import sqlite3
@@ -27,10 +27,29 @@ wdth = 20
 x_stonel = 50
 y_stonel = 50
 
-#creating a file if it doesnt already exist
-file_path = Path("file.txt")
-if file_path.is_file():
-    print("file already exists")
+
+#achievements, defaults to false
+achievements = {
+    #how many stones found
+    "stones": [0, 0, 0, 0, 0],
+    "deaths": 0,
+    #completed the whole thing without dying
+    "one life": False,
+    #completed the game
+    "awakened": False,
+    "speedrunner": False,
+    "the ultimate speedrunner": False,
+    #talked to all the NPCS in the game
+    "chatty": [0, 0, 0, 0, 0]
+}
+#file for achievement storage
+#file name
+file_path = "file.txt"
+#opening the file in read and write mode or creating it if it exists
+#non-+ write mode won't let you edit the data
+f = open(file_path, "w+")
+
+
     
 #opens db connection or creates one
 conn = sqlite3.connect("objects.db")
