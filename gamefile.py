@@ -200,8 +200,6 @@ def draw_lvl(rocks):
         platforms = createrocks[key][1]
         if platforms[0] == "air":
             platforms.insert(1, 0)
-        print("platofrms 0")
-        print(platforms[0])
         #finding how long each platform is
         #each levels y position
         ypos = createrocks[key][0][1]
@@ -209,25 +207,13 @@ def draw_lvl(rocks):
             xpos += createrocks[key][0][0] 
             #totalpcent is the same as platforms without the starttype
             totalpcent = createrocks[key][1]
-            print("platofrms 1")
-            print(platforms[0])
             totalpcent.pop(0)
-                
-            print("platforms/totalpcent 1")
-            print(platforms[0])
-            print(totalpcent)
             platx = int(screen_width/sum(totalpcent))
             
             platforms = createrocks[key][1]
-            print("platforms/totalpcent 2")
-            print(platforms[0])
-            print(totalpcent)
 
             #if the lvl starts with air:
             #skip platform generation and move the cursor the platform width over
-            print(f"platforms  b4 air check {[platforms]}")
-            print(platforms[0])
-
             #listing air/ground ratios
             rendergnds = platforms[::2]
             #remove the start type so every 2nd one is air
@@ -238,7 +224,6 @@ def draw_lvl(rocks):
             for i in range(len(renderair)+len(rendergnds)):
                 #creating slab section if it should exist
                 if len(rendergnds) > 0:
-                    print(f"rendergnds2 {rendergnds}")
                     platwidth = platx*rendergnds[0]
                     rock = Platform()
                     rock_rect = pygame.Rect(xpos, ypos, platwidth, 50)
@@ -281,18 +266,15 @@ while rungame == True:
                 plyr.ypos -= plyr_speed
             #if the player is in the blocks x range and is c
             elif (plyr.xpos >= (rock.left)) and (plyr.xpos <= (rock.right)) and (plyr.ypos >= rock.top):
-                print("Bottom")
                 falling = True
                 cols[1] = True
             #if the player hits the RHS of a block
-            elif (plyr.xpos >= rock.left) and (plyr.xpos <= rock.right):
-                print("LHS")
+            elif (plyr.xpos >= (rock.left-100)) and (plyr.xpos <= rock.right):
                 cols[2] = True
                 #plyr.xpos = rock.left - 40
                 #plyr.xpos -= plyr_speed
             #if the player hits the LHS of a block
             elif (plyr.xpos <= rock.right):
-                print("RHS")
                 cols[3] = True
                 falling = True
                 #plyr.xpos = rock.right + 40
@@ -301,16 +283,14 @@ while rungame == True:
                 #setting all collisions to false
                 for col in cols:
                     cols[col] = False
-                print("no collisions")
-            #topcheck
-            #print(f"rock {rock}")
     #checking for move key inputs
     press = pygame.key.get_pressed()
     if (press[pygame.K_UP]) and (falling == False) and (cols[1] == False): 
         plyr.ypos-=plyr_speed
         print("UPPPPP")
-    if (press[pygame.K_DOWN]) and (cols[0] == False): 
-        plyr.ypos+=plyr_speed
+    #moving down hashed until needed
+    #if (press[pygame.K_DOWN]) and (cols[0] == False): 
+    #    plyr.ypos+=plyr_speed
     if (press[pygame.K_LEFT]) and (cols[2] == False): 
         plyr.xpos-=plyr_speed
     if (press[pygame.K_RIGHT]) and (cols[3] == False):
