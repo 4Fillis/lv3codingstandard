@@ -1,60 +1,78 @@
 import pygame
+import sys
 
-# Initialize Pygame constants
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+# 1. Initialize Pygame
+pygame.init()
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Platformer Ground Example")
+clock = pygame.time.Clock()
 
-class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        """Initializes the player's texture, positioning, and speed metrics."""
-        super().__init__()
-        
-        # Create a simple placeholder square for the player texture
-        self.image = pygame.Surface((50, 50))
-        self.image.fill((0, 128, 255)) # Blue color
-        
-        # Pygame Rect handles positioning and collisions 
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
-        
-        # Custom movement attributes
-        self.speed = 5
+# 2. Game Variables & Physics
+GRAVITY = 0.8
+JUMP_STRENGTH = -16
 
-    def handle_input(self):
-        """Monitors real-time keystrokes to calculate player intentions."""
-        keys = pygame.key.get_pressed()
-        
-        self.velocity_x = 0
-        self.velocity_y = 0
-        
-        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-            self.velocity_x = -self.speed
-        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-            self.velocity_x = self.speed
-        if keys[pygame.K_UP] or keys[pygame.K_w]:
-            self.velocity_y = -self.speed
-        if keys[pygame.K_DOWN] or keys[pygame.K_s]:
-            self.velocity_y = self.speed
+# 3. Create Rectangles (Hitboxes)
+# Player: [x, y, width, height]
+player_rect = pygame.Rect(100, 100, 40, 60)
+player_vel_y = 0
+is_on_ground = False
 
-    def update(self):
-        """Updates the player state and ensures they stay within screen bounds."""
-        # Process keystroke updates first
-        self.handle_input()
-        
-        # Displace player location vector
-        self.rect.x += self.velocity_x
-        self.rect.y += self.velocity_y
-        
-        # Screen border containment checks
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.right > SCREEN_WIDTH:
-            self.rect.right = SCREEN_WIDTH
-        if self.rect.top < 0:
-            self.rect.top = 0
-        if self.rect.bottom > SCREEN_HEIGHT:
-            self.rect.bottom = SCREEN_HEIGHT
+# Ground and Platforms list
+platforms = [
+    pygame.Rect(0, 520, 800, 80),      # Main solid ground
+    pygame.Rect(200, 400, 200, 20),    # Floating platform 1
+    pygame.Rect(450, 300, 200, 20)     # Floating platform 2
+]
 
-    def draw(self, surface):
-        """Draws the player's texture onto the main active game window."""
-        surface.blit(self.image, self.rect)
+# 4. Main Game Loop
+running = True
+while running:
+    screen.fill((135, 206, 235))  # Clear screen with Sky Blue
+
+    # Event handling
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    # Horizontal Input & Movement
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        player_rect.x -= 5
+    if keys[pygame.K_RIGHT]:
+        player_rect.x += 5
+
+    # Jumping Input (Only if touching the ground)
+    if keys[pygame.K_SPACE] and is_on_ground:
+        player_vel_y = JUMP_STRENGTH
+        is_on_ground = False
+
+    # Apply Gravity
+    player_vel_y += GRAVITY
+    
+    # Move vertically FIRST, then check vertical ground collisions
+    player_rect.y += player_vel_y
+    is_on_ground = False  # Reset frame check
+
+    for platform in platforms:
+        if player_rect.colliderect(platform):
+            if player_vel_y > 0:  # Falling down onto the ground
+                player_rect.bottom = platform.top
+                player_vel_y = 0
+                is_on_ground = True
+            elif player_vel_y < 0:  # Hitting a platform from below
+                player_rect.top = platform.bottom
+                player_vel_y = 0
+
+    # 5. Drawing elements
+    # Draw Ground/Platforms (Dark Green)
+    for platform in platforms:
+        pygame.draw.rect(screen, (34, 139, 34), platform)
+
+    # Draw Player (Red)
+    pygame.draw.rect(screen, (255, 0, 0), player_rect)
+
+    pygame.display.flip()
+    clock.tick(60)  # Maintain 60 FPS
+
+pygame.quit()

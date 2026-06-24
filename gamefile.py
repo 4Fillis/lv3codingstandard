@@ -4,6 +4,7 @@ from pygame.locals import *
 import sys
 from random import randint
 from time import sleep
+import os
 
 #SQL libraries import
 import sqlite3
@@ -26,6 +27,30 @@ wdth = 20
 x_stonel = 50
 y_stonel = 50
 
+
+#achievements, defaults to false
+achievements = {
+    #how many stones found
+    "stones": [0, 0, 0, 0, 0],
+    "deaths": 0,
+    #completed the whole thing without dying
+    "one life": False,
+    #completed the game
+    "awakened": False,
+    "speedrunner": False,
+    "the ultimate speedrunner": False,
+    #talked to all the NPCS in the game
+    "chatty": [0, 0, 0, 0, 0]
+}
+#file for achievement storage
+#file name
+file_path = "file.txt"
+#opening the file in read and write mode or creating it if it exists
+#non-+ write mode won't let you edit the data
+f = open(file_path, "w+")
+
+
+    
 #opens db connection or creates one
 conn = sqlite3.connect("objects.db")
 #creating cursor
@@ -100,9 +125,9 @@ class Plyr:
         n_width = int((self.img.get_rect().width)*scale)
         n_height = int((self.img.get_rect().height)*scale)
         self.img = pygame.transform.scale(self.img, (n_width, n_height))
-        self.hitbox = (n_width, n_height)
         self.xpos = 30
         self.ypos = 0 
+        #self.rect = pygame.Rect(self.xpos, self.ypos, n_width, n_height)
 
 #creating the player sprite object
 plyr = Plyr()
@@ -141,13 +166,16 @@ rocks_pos = {
     "airypos" : [],
     "airxpos" : [],
 }
+
 #platform arrangement dict, 
-#coords are 1st list item, start type & % of screen width 2nd list item
+#start coords are 1st list item, start type & % of screen width is the 2nd list item
 createrocks = {
-    "lwr": [[0, 400], ["gnd", 1, 2, 3, 4, 5]],
-    #"upr": [[0, 100], ["gnd", 1, 1, 1, 1]],
-    #"air": [[0, 250], ["gnd", 1, 3, 2]]
+    "lwr": [[1, 400], ["gnd", 1, 2, 3, 4, 5]],
+    "upr": [[1, 100], ["gnd", 1, 1, 1, 1]],
+    "air": [[1, 250], ["air", 1, 2, 3, 4, 5]]
 }
+
+
 #dict for attributes of gnd types
 #rendered y/n, color
 gndtypes = {
@@ -156,67 +184,78 @@ gndtypes = {
     "lava": [True, lva_clr],
     "water": [True, wtr_clr]
 }
+
+
 rocks = []
-platwidth = 0
-doneplats = 0
-xpos = 0
-print("hihi\n")
-for key in createrocks:
-    #finding the total amt of rocks
-    if not createrocks[key]:
-        createrocks[key] = [[0, 0], ["air", 1]]
-    platforms = createrocks[key][1]
-    starttype = platforms[0]
-    del platforms[0]
-    #finding how long each platform is
-    lenplatform = sum(platforms) / len(platforms)
-    for x in platforms:
-        xpos += createrocks[key][0][0] 
-        print(f"x. {x}, {gndtypes[starttype][0]} ")
-        #listing air/ground ratios
-        rendergnds = createrocks[key][1][::2]
-        renderair = platforms[::2]
-        platx = int(screen_width/sum(platforms))
-
-        #if the lvl starts with air:
-        #skip platform generation and move the cursor the platform width over
-        if (x == 0) and starttype == "air":
-            platwidth = (screen_width/sum(platforms))*x
-            xpos = xpos + createrocks[key][0][0] + platwidth
-        #for the amt of platforms, generate a gnd then air slab
-        for i in range(len(renderair)+len(rendergnds)):
-            #only rendering if theres are platforms to be rendered
-            if len(rendergnds) > 0:
-                rock = Platform()
-                platwidth = platx*rendergnds[0]
-                rendergnds.pop(0)
-
-            #'generating' the air slabs
-            if len(rendergnds) > 0:
-                xpos += platwidth + platx*renderair[0]
-
-
-
-        if gndtypes[starttype][0] == True:
-            
-            
-            #creates platform at the end of the previous platform
-            
-            ypos = createrocks[key][0][1]
-            rock_rect = pygame.Rect(xpos, ypos, platwidth, 50)
-            xpos += + platwidth
-            rocks.append(rock_rect)
-            rockypos = [rock.ypos]
-        elif gndtypes[starttype][0] == False:
-            platwidth = (screen_width/sum(platforms))*x
-            xpos = xpos + createrocks[key][0][0] + platwidth
-    print("lvldone")
-    #resetting xpos to LHS of screen
+def draw_lvl(rocks):
+    #variables/lists needed
+    platwidth = 0
     xpos = 0
+    #for each height of platforms specified in the lvl
+    for key in createrocks:
+        #finding the total amt of platforms
+        #avoiding empty errors by turning empty lvls into just air
+        if not createrocks[key]:
+            createrocks[key] = [[0, 0], ["air", 1]]
+        platforms = createrocks[key][1]
+        if platforms[0] == "air":
+            platforms.insert(1, 0)
+        print("platofrms 0")
+        print(platforms[0])
+        #finding how long each platform is
+        #each levels y position
+        ypos = createrocks[key][0][1]
+        for x in range(1):
+            xpos += createrocks[key][0][0] 
+            #totalpcent is the same as platforms without the starttype
+            totalpcent = createrocks[key][1]
+            print("platofrms 1")
+            print(platforms[0])
+            totalpcent.pop(0)
+                
+            print("platforms/totalpcent 1")
+            print(platforms[0])
+            print(totalpcent)
+            platx = int(screen_width/sum(totalpcent))
+            
+            platforms = createrocks[key][1]
+            print("platforms/totalpcent 2")
+            print(platforms[0])
+            print(totalpcent)
 
+            #if the lvl starts with air:
+            #skip platform generation and move the cursor the platform width over
+            print(f"platforms  b4 air check {[platforms]}")
+            print(platforms[0])
 
+            #listing air/ground ratios
+            rendergnds = platforms[::2]
+            #remove the start type so every 2nd one is air
+            platforms.pop(0)
+            renderair = platforms[::2]
+
+            #for the amt of platforms, generate a gnd then air slab
+            for i in range(len(renderair)+len(rendergnds)):
+                #creating slab section if it should exist
+                if len(rendergnds) > 0:
+                    print(f"rendergnds2 {rendergnds}")
+                    platwidth = platx*rendergnds[0]
+                    rock = Platform()
+                    rock_rect = pygame.Rect(xpos, ypos, platwidth, 50)
+                    rocks.append(rock_rect)
+                    rendergnds.pop(0)
+                if len(renderair) > 0:
+                    #'generating' the air slab
+                    xpos += platwidth + platx*renderair[0]
+                    renderair.pop(0)
+        #resetting xpos to LHS of screen
+        xpos = 0
+    return(rocks)
+
+draw_lvl(rocks)
 #game loop
 rungame = True
+falling = True
 while rungame == True:
     #if the user quits the window
     for event in pygame.event.get():
@@ -224,22 +263,62 @@ while rungame == True:
             pygame.quit()
             sys.exit()
     
-    #checking for collisions
-    plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, 50, 50)
-    for rock in rocks:
-        if plyr_rect.colliderect(rock):
-            #print("quack\nquack\n")
-            if ((plyr.ypos-10) < (rock.pos[1] + 25)) and (plyr.ypos+10) > (rockypos[1] - 25):
-                print("in block\n")
+    
 
+    if falling == True:
+        plyr.ypos += plyr_speed
+    #checking for collisions
+    plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, 40, 40)
+    for rock in rocks:
+        #using 0, 0, 0, 0 to use the 0 = False and 1 = True technicality
+        #    up-down-left-right
+        cols = [0, 0, 0, 0]
+        if plyr_rect.colliderect(rock):
+            #if the plyr is in the blocks x range and is higher than the rocks top. i.e a on a platform
+            if (plyr.xpos >= rock.left) and (plyr.xpos <= rock.right) and (plyr.ypos <= rock.top):
+                cols[0] = True
+                falling = False
+                plyr.ypos -= plyr_speed
+            #if the player is in the blocks x range and is c
+            elif (plyr.xpos >= (rock.left)) and (plyr.xpos <= (rock.right)) and (plyr.ypos >= rock.top):
+                print("Bottom")
+                falling = True
+                cols[1] = True
+            #if the player hits the RHS of a block
+            elif (plyr.xpos >= rock.left) and (plyr.xpos <= rock.right):
+                print("LHS")
+                cols[2] = True
+                #plyr.xpos = rock.left - 40
+                #plyr.xpos -= plyr_speed
+            #if the player hits the LHS of a block
+            elif (plyr.xpos <= rock.right):
+                print("RHS")
+                cols[3] = True
+                falling = True
+                #plyr.xpos = rock.right + 40
+                #plyr.xpos += plyr_speed
+            else:
+                #setting all collisions to false
+                for col in cols:
+                    cols[col] = False
+                print("no collisions")
+            #topcheck
+            #print(f"rock {rock}")
     #checking for move key inputs
     press = pygame.key.get_pressed()
-    if press[pygame.K_UP]: plyr.ypos-=plyr_speed
-    if (press[pygame.K_DOWN]): 
+    if (press[pygame.K_UP]) and (falling == False) and (cols[1] == False): 
+        plyr.ypos-=plyr_speed
+        print("UPPPPP")
+    if (press[pygame.K_DOWN]) and (cols[0] == False): 
         plyr.ypos+=plyr_speed
-    if press[pygame.K_LEFT]: plyr.xpos-=plyr_speed
-    if press[pygame.K_RIGHT]: plyr.xpos+=plyr_speed
-
+    if (press[pygame.K_LEFT]) and (cols[2] == False): 
+        plyr.xpos-=plyr_speed
+    if (press[pygame.K_RIGHT]) and (cols[3] == False):
+         plyr.xpos+=plyr_speed
+    if cols[0]  == True:
+        falling = False 
+    else:
+        falling = True
     #clearing screen
     screen.fill(bg_clr)
     #using blit to add sprites to screen, top left is (0, 0)
