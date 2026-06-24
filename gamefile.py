@@ -268,29 +268,30 @@ while rungame == True:
     if falling == True:
         plyr.ypos += plyr_speed
     #checking for collisions
-    plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, 45, 45)
+    plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, 40, 40)
     for rock in rocks:
-        #using 0, 0, 0, 0 to abuse the 0 = False and 1 = True technicality
+        #using 0, 0, 0, 0 to use the 0 = False and 1 = True technicality
         #    up-down-left-right
         cols = [0, 0, 0, 0]
         if plyr_rect.colliderect(rock):
             #if the plyr is in the blocks x range and is higher than the rocks top. i.e a on a platform
-            if (plyr.xpos > rock.left) and (plyr.xpos < rock.right) and (plyr.ypos < rock.top):
+            if (plyr.xpos >= rock.left) and (plyr.xpos <= rock.right) and (plyr.ypos <= rock.top):
                 cols[0] = True
                 falling = False
+                plyr.ypos -= plyr_speed
             #if the player is in the blocks x range and is c
-            elif (plyr.xpos > (rock.left)) and (plyr.xpos < (rock.right)) and (plyr.ypos < rock.top):
+            elif (plyr.xpos >= (rock.left)) and (plyr.xpos <= (rock.right)) and (plyr.ypos >= rock.top):
                 print("Bottom")
                 falling = True
                 cols[1] = True
             #if the player hits the RHS of a block
-            elif (plyr.xpos > rock.left):
+            elif (plyr.xpos >= rock.left) and (plyr.xpos <= rock.right):
                 print("LHS")
                 cols[2] = True
                 #plyr.xpos = rock.left - 40
                 #plyr.xpos -= plyr_speed
             #if the player hits the LHS of a block
-            elif (plyr.xpos < rock.right) and (plyr.xpos > (rock.left + 25)):
+            elif (plyr.xpos <= rock.right):
                 print("RHS")
                 cols[3] = True
                 falling = True
@@ -300,12 +301,14 @@ while rungame == True:
                 #setting all collisions to false
                 for col in cols:
                     cols[col] = False
+                print("no collisions")
             #topcheck
             #print(f"rock {rock}")
     #checking for move key inputs
     press = pygame.key.get_pressed()
     if (press[pygame.K_UP]) and (falling == False) and (cols[1] == False): 
         plyr.ypos-=plyr_speed
+        print("UPPPPP")
     if (press[pygame.K_DOWN]) and (cols[0] == False): 
         plyr.ypos+=plyr_speed
     if (press[pygame.K_LEFT]) and (cols[2] == False): 
