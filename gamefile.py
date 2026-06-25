@@ -155,18 +155,6 @@ class Platform:
         self.pos = [self.xpos, self.ypos]
 
 
-#Rock pos dict for collision checking
-rocks_pos = {
-    "lwrypos" : [],
-    "lwrxpos" : [],
-    
-    "uprypos" : [],
-    "uprxpos" : [],
-
-    "airypos" : [],
-    "airxpos" : [],
-}
-
 #platform arrangement dict, 
 #start coords are 1st list item, start type & % of screen width is the 2nd list item
 createrocks = {
@@ -175,6 +163,14 @@ createrocks = {
     "air": [[1, 250], ["air", 1, 2, 3, 4, 5]]
 }
 
+game_platforms = {
+    1: {"lwr": [[1, 400], ["gnd", 1, 2, 3, 4, 5]],
+        "upr": [[1, 100], ["gnd", 1, 1, 1, 1]],
+        "air": [[1, 250], ["air", 1, 2, 3, 4, 5]]},
+    2: {"lwr": [[1, 400], ["gnd", 1, 1, 1]],
+        "upr": [[1, 100], ["gnd", 2, 1, 1]],
+        "air": [[1, 250], ["air", 1, 1, 1, 1, 1, 1]]},
+}
 
 #dict for attributes of gnd types
 #rendered y/n, color
@@ -187,11 +183,13 @@ gndtypes = {
 
 
 rocks = []
-def draw_lvl(rocks):
+def draw_lvl(lvl, rocks):
     #variables/lists needed
     platwidth = 0
     xpos = 0
     #for each height of platforms specified in the lvl
+    createrocks = game_platforms[lvl]
+
     for key in createrocks:
         #finding the total amt of platforms
         #avoiding empty errors by turning empty lvls into just air
@@ -237,11 +235,11 @@ def draw_lvl(rocks):
         xpos = 0
     return(rocks)
 
-draw_lvl(rocks)
+draw_lvl(1, rocks)
 #game loop
 rungame = True
 falling = True
-ignore_gnd = [False, 0, 20]
+ignore_gnd = [False, 0, 40]
 while rungame == True:
     #if the user quits the window
     for event in pygame.event.get():
@@ -271,12 +269,12 @@ while rungame == True:
                 cols[1] = True
                 plyr.ypos += plyr_speed
             #if the player hits the RHS of a block
-            elif (plyr.xpos >= (rock.left-100)) and (plyr.xpos <= rock.right):
+            elif (plyr.xpos >= (rock.left)) and (plyr.xpos <= rock.right):
                 cols[2] = True
                 #plyr.xpos = rock.left - 40
                 #plyr.xpos -= plyr_speed
             #if the player hits the LHS of a block
-            elif (plyr.xpos <= rock.right):
+            elif (plyr.xpos >= (rock.left)) and (plyr.xpos <= (rock.right -10)):
                 cols[3] = True
                 falling = True
                 #plyr.xpos = rock.right + 40
@@ -289,7 +287,7 @@ while rungame == True:
     press = pygame.key.get_pressed()
     if (press[pygame.K_UP]) and (falling == False) and (cols[1] == False): 
         falling = False
-        ignore_gnd = True
+        ignore_gnd[0] = True
         plyr.ypos -= plyr_speed
         print("UPPPPP")
     #moving down hashed until needed
@@ -309,12 +307,21 @@ while rungame == True:
     screen.blit(plyr.img, (plyr.xpos, plyr.ypos))
     for rock in rocks:
         pygame.draw.rect(screen, plyr_clr, rock)
-
-    if (ignore_gnd[0] == 1) and (ignore_gnd[1]<ignore_gnd[2]):
-        ignore_gnd[1] += 1
+    print(f"ignore_gnd {ignore_gnd}")
+    if (ignore_gnd[0] == True) and (ignore_gnd[1] < ignore_gnd[2]):
+        ratio = 2
+        ignore_gnd[1] += round(ratio, 1)
+        plyr.ypos -= round(ratio*plyr_speed, 1)
+        print(ignore_gnd[1])
         print(ignore_gnd)
-    elif ignore_gnd[1]<ignore_gnd[2]:
+    elif (ignore_gnd[1]>=ignore_gnd[2]):
         ignore_gnd[0] = False
+        ignore_gnd[1] = 0
+
+    #resetting player to start if they go off the edge
+    if plyr.ypos > 600:
+        plyr.xpos = 30
+        plyr.ypos = 30
 
     #updating the display
     pygame.display.update()
