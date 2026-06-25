@@ -269,7 +269,7 @@ while rungame == True:
                 falling = True
                 cols[1] = True
             #if the player hits the RHS of a block
-            elif (plyr.xpos >= rock.left) and (plyr.xpos <= rock.right):
+            elif (plyr.xpos >= (rock.left-100)) and (plyr.xpos <= rock.right):
                 cols[2] = True
                 #plyr.xpos = rock.left - 40
                 #plyr.xpos -= plyr_speed
@@ -288,8 +288,9 @@ while rungame == True:
     if (press[pygame.K_UP]) and (falling == False) and (cols[1] == False): 
         plyr.ypos-=plyr_speed
         print("UPPPPP")
-    if (press[pygame.K_DOWN]) and (cols[0] == False): 
-        plyr.ypos+=plyr_speed
+    #moving down hashed until needed
+    #if (press[pygame.K_DOWN]) and (cols[0] == False): 
+    #    plyr.ypos+=plyr_speed
     if (press[pygame.K_LEFT]) and (cols[2] == False): 
         plyr.xpos-=plyr_speed
     if (press[pygame.K_RIGHT]) and (cols[3] == False):
