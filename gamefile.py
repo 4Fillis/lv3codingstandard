@@ -102,8 +102,6 @@ if rundb:
     for row in result:
         print(row)
 
-
-
 #starting pygame
 pygame.init()
 #creating window
@@ -145,7 +143,7 @@ class Treasure:
 
         self.xpos = 50
         self.ypos = 50 
-
+treasure  = Treasure()
 #player character class
 class Platform:
     def __init__(self):
@@ -235,7 +233,7 @@ def draw_lvl(lvl, rocks):
         xpos = 0
     return(rocks)
 
-draw_lvl(1, rocks)
+draw_lvl(2, rocks)
 #game loop
 rungame = True
 falling = True
@@ -274,15 +272,20 @@ while rungame == True:
                 #plyr.xpos = rock.left - 40
                 #plyr.xpos -= plyr_speed
             #if the player hits the LHS of a block
-            elif (plyr.xpos >= (rock.left)) and (plyr.xpos <= (rock.right -10)):
+            elif (plyr.xpos >= (rock.left-25)) and (plyr.xpos <= (rock.right-10)):
                 cols[3] = True
                 falling = True
                 #plyr.xpos = rock.right + 40
-                #plyr.xpos += plyr_speed
+                plyr.xpos -= 2*plyr_speed
+                cols[0] = True
+                falling = False
+                plyr.ypos -= plyr_speed
+                print("LHS")
             else:
                 #setting all collisions to false
                 for col in cols:
                     cols[col] = False
+                print("no collisions")
     #checking for move key inputs
     press = pygame.key.get_pressed()
     if (press[pygame.K_UP]) and (falling == False) and (cols[1] == False): 
@@ -307,13 +310,11 @@ while rungame == True:
     screen.blit(plyr.img, (plyr.xpos, plyr.ypos))
     for rock in rocks:
         pygame.draw.rect(screen, plyr_clr, rock)
-    print(f"ignore_gnd {ignore_gnd}")
+    #ignoring top of block collisions for a few frames while jumping
     if (ignore_gnd[0] == True) and (ignore_gnd[1] < ignore_gnd[2]):
         ratio = 2
         ignore_gnd[1] += round(ratio, 1)
         plyr.ypos -= round(ratio*plyr_speed, 1)
-        print(ignore_gnd[1])
-        print(ignore_gnd)
     elif (ignore_gnd[1]>=ignore_gnd[2]):
         ignore_gnd[0] = False
         ignore_gnd[1] = 0
