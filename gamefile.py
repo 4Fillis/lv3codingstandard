@@ -241,6 +241,7 @@ draw_lvl(rocks)
 #game loop
 rungame = True
 falling = True
+ignore_gnd = [False, 0, 20]
 while rungame == True:
     #if the user quits the window
     for event in pygame.event.get():
@@ -260,14 +261,15 @@ while rungame == True:
         cols = [0, 0, 0, 0]
         if plyr_rect.colliderect(rock):
             #if the plyr is in the blocks x range and is higher than the rocks top. i.e a on a platform
-            if (plyr.xpos >= rock.left) and (plyr.xpos <= rock.right) and (plyr.ypos <= rock.top):
+            if (plyr.xpos >= rock.left) and (plyr.xpos <= rock.right) and (plyr.ypos <= rock.top) and (ignore_gnd[0] == False):
                 cols[0] = True
                 falling = False
                 plyr.ypos -= plyr_speed
-            #if the player is in the blocks x range and is c
-            elif (plyr.xpos >= (rock.left)) and (plyr.xpos <= (rock.right)) and (plyr.ypos >= rock.top):
+            #if the player is in the blocks x range and is hitting the bottom of the platform
+            elif (plyr.xpos >= (rock.left)) and (plyr.xpos <= (rock.right)) and (plyr.ypos >= (rock.bottom - 5)):
                 falling = True
                 cols[1] = True
+                plyr.ypos += plyr_speed
             #if the player hits the RHS of a block
             elif (plyr.xpos >= (rock.left-100)) and (plyr.xpos <= rock.right):
                 cols[2] = True
@@ -286,7 +288,9 @@ while rungame == True:
     #checking for move key inputs
     press = pygame.key.get_pressed()
     if (press[pygame.K_UP]) and (falling == False) and (cols[1] == False): 
-        plyr.ypos-=plyr_speed
+        falling = False
+        ignore_gnd = True
+        plyr.ypos -= plyr_speed
         print("UPPPPP")
     #moving down hashed until needed
     #if (press[pygame.K_DOWN]) and (cols[0] == False): 
@@ -306,8 +310,14 @@ while rungame == True:
     for rock in rocks:
         pygame.draw.rect(screen, plyr_clr, rock)
 
-    
-    pygame.display.update()
+    if (ignore_gnd[0] == 1) and (ignore_gnd[1]<ignore_gnd[2]):
+        ignore_gnd[1] += 1
+        print(ignore_gnd)
+    elif ignore_gnd[1]<ignore_gnd[2]:
+        ignore_gnd[0] = False
 
+    #updating the display
+    pygame.display.update()
     #fps to stop crashes
     clock.tick(60)
+    
