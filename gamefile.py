@@ -10,9 +10,9 @@ import os
 import sqlite3
 
 #color variables
-bg_clr = (251, 247, 215)
-plyr_clr = (160, 117, 230)
-gnd_clr = (254, 200, 216)
+bg_clr = (158, 233, 255)
+gnd_clr = (24, 82, 38)
+plyr_clr = gnd_clr
 lva_clr = (212, 50, 0)
 wtr_clr = (15, 182, 212)
 
@@ -131,19 +131,19 @@ class Plyr:
 plyr = Plyr()
 
 #special stones class
-class Treasure:
+class Portal:
     def __init__(self):
         #loading sprite img, png files reccomended
-        self.img = pygame.image.load('pygamerescources\images\duck.webp')
+        self.img = pygame.image.load('pygamerescources\images\nether_portal.png')
         self.hb = self.img.get_rect()
         #resizing sprite
         width = self.img.get_rect().width
         height = self.img.get_rect().height
         self.img = pygame.transform.scale(self.img, (int(width*0.2), int(height*0.2)))
 
-        self.xpos = 50
-        self.ypos = 50 
-treasure  = Treasure()
+        self.xpos = 250
+        self.ypos = 400
+
 #player character class
 class Platform:
     def __init__(self):
@@ -163,12 +163,19 @@ createrocks = {
 
 game_platforms = {
     1: {"lwr": [[1, 400], ["gnd", 1, 2, 3, 4, 5]],
-        "upr": [[1, 100], ["gnd", 1, 1, 1, 1]],
+        "upr": [[1, 150], ["gnd", 1, 1, 1, 1]],
         "air": [[1, 250], ["air", 1, 2, 3, 4, 5]]},
-    2: {"lwr": [[1, 400], ["gnd", 1, 1, 1]],
-        "upr": [[1, 100], ["gnd", 2, 1, 1]],
+    2: {"lwr": [[1, 400], ["gnd", 1, 1, 1, 1, 1]],
+        "upr": [[1, 125], ["gnd", 2, 1, 1]],
         "air": [[1, 250], ["air", 1, 1, 1, 1, 1, 1]]},
+    3: {"lwr": [[1, 400], ["gnd", 2, 3, 4]],
+        "upr": [[1, 125], ["air", 1, 1]],
+        "air": [[1, 250], ["air", 3, 2, 1]]},
 }
+lvl = 1
+#find the next level
+def next_lvl(lvl):
+    lvl+=1
 
 #dict for attributes of gnd types
 #rendered y/n, color
@@ -233,7 +240,7 @@ def draw_lvl(lvl, rocks):
         xpos = 0
     return(rocks)
 
-draw_lvl(2, rocks)
+draw_lvl(lvl, rocks)
 #game loop
 rungame = True
 falling = True
@@ -257,29 +264,30 @@ while rungame == True:
         cols = [0, 0, 0, 0]
         if plyr_rect.colliderect(rock):
             #if the plyr is in the blocks x range and is higher than the rocks top. i.e a on a platform
-            if (plyr.xpos >= rock.left) and (plyr.xpos <= rock.right) and (plyr.ypos <= rock.top) and (ignore_gnd[0] == False):
+            if (plyr.xpos >= (rock.left-25)) and (plyr.xpos <= rock.right) and (plyr.ypos <= rock.top) and (ignore_gnd[0] == False):
                 cols[0] = True
                 falling = False
                 plyr.ypos -= plyr_speed
             #if the player is in the blocks x range and is hitting the bottom of the platform
-            elif (plyr.xpos >= (rock.left)) and (plyr.xpos <= (rock.right)) and (plyr.ypos >= (rock.bottom - 5)):
+            elif (plyr.xpos >= (rock.left-25)) and (plyr.xpos <= (rock.right)) and (plyr.ypos >= (rock.bottom - 5)):
                 falling = True
                 cols[1] = True
                 plyr.ypos += plyr_speed
             #if the player hits the RHS of a block
-            elif (plyr.xpos >= (rock.left)) and (plyr.xpos <= rock.right):
+            elif (plyr.xpos >= (rock.left+25)) and (plyr.xpos <= rock.right):
                 cols[2] = True
-                #plyr.xpos = rock.left - 40
+                plyr.xpos = rock.right + plyr_speed
                 #plyr.xpos -= plyr_speed
             #if the player hits the LHS of a block
             elif (plyr.xpos >= (rock.left-25)) and (plyr.xpos <= (rock.right-10)):
                 cols[3] = True
-                falling = True
-                #plyr.xpos = rock.right + 40
-                plyr.xpos -= 2*plyr_speed
-                cols[0] = True
-                falling = False
-                plyr.ypos -= plyr_speed
+                plyr.xpos = rock.left - 50
+
+                #plyr.xpos = rock.left - plyr_speed
+                #plyr.xpos -= 2*plyr_speed
+                #cols[0] = True
+                #falling = False
+                #plyr.ypos -= plyr_speed
                 print("LHS")
             else:
                 #setting all collisions to false
@@ -320,10 +328,14 @@ while rungame == True:
         ignore_gnd[1] = 0
 
     #resetting player to start if they go off the edge
-    if plyr.ypos > 600:
+    if plyr.ypos > (screen_height+100):
         plyr.xpos = 30
         plyr.ypos = 30
-
+    if (plyr.xpos > 300) and (plyr.ypos < 100):
+        next_lvl(lvl)
+        lvl+=1
+    print(lvl)
+    print(f"[{plyr.xpos, plyr.ypos}]")
     #updating the display
     pygame.display.update()
     #fps to stop crashes
