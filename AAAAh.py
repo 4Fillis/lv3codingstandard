@@ -196,8 +196,7 @@ def draw_lvl(lvl, rocks):
     #for each height of platforms specified in the lvl
     createrocks = game_platforms[lvl]
     print(f"lvl: {lvl} createrocks {createrocks}")
-    for rock in rocks:
-        rocks.pop(0)
+
     for key in createrocks:
         #finding the total amt of platforms
         #avoiding empty errors by turning empty lvls into just air
