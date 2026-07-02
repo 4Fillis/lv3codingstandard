@@ -1,6 +1,5 @@
 #Not following any tutorial, we go freelance
-import pygame
-from pygame.locals import *
+import pygame#from pygame.locals import *
 import sys
 from random import randint
 from time import sleep
