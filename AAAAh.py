@@ -162,21 +162,22 @@ class Platform:
 #}
 
 game_platforms = {
-    1: {"lwr": [[1, 400], ["gnd", 1, 2]],
-        "upr": [[1, 150], ["gnd", 1, 1, 1, 1]],
-        "air": [[1, 250], ["air", 1, 2, 3, 4, 5]]},
-    2: {"lwr": [[1, 401], ["gnd", 2, 4, 3, 2, 1]],
+    #1,2,3 is the lvl number, "gnd" is what the lvl starts on, numbers after are the % with of either air or gnd
+    #ISSUE this doesnt account for future changes with different gnd types
+    #TODO change it so it always starts with gnd for air just start it w/ 0
+    1: {"lwr": [[1, 400], ["gnd", 2, 2]],
+        "upr": [[1, 150], ["gnd", 2, 2, 2, 2]],
+        "air": [[1, 250], ["air", 2, 2, 3, 4, 5]]},
+    2: {"lwr": [[1, 401], ["gnd", 2, 4, 3, 2, 7]], #ISSUE THE SEVEN IS ALL THATS LEFT FOR SOME REASON? WHY??
         "upr": [[1, 125], ["gnd", 2, 4, 2]],
         "air": [[1, 240], ["air", 2, 3, 2, 1]]},
     3: {"lwr": [[1, 402], ["gnd", 3, 3, 4, 1, 3, 3, 4]],
         "upr": [[1, 120], ["air", 3, 1]],
         "air": [[1, 230], ["air", 3, 2, 1]]},
 }
+#starting on lvl 1
 lvl = 1
-#find the next level
-def next_lvl(lvl):
-    lvl+=1
-    draw_lvl(lvl, rocks)
+
 
 #dict for attributes of gnd types
 #rendered y/n, color
@@ -195,6 +196,7 @@ def draw_lvl(lvl, rocks):
     xpos = 0
     #for each height of platforms specified in the lvl
     createrocks = game_platforms[lvl]
+    print(f"draw_lvl createrks = {createrocks}")
     print(f"lvl: {lvl} createrocks {createrocks}")
 
     for key in createrocks:
@@ -218,13 +220,21 @@ def draw_lvl(lvl, rocks):
             print(f"poptop {totalpcent[0]}")
             totalpcent.pop(0)
             platx = int(screen_width/sum(totalpcent))
-            
+
+            #ISSUE HERE for some reason platforms = 1
             platforms = createrocks[key][1]
+            print(f"crreeaterocks = {createrocks}")
+            print(f"crreaterocks key = {createrocks[key]}")
+            print(f"key = {key}")
+            print(f"platforms?? = {platforms}")
 
             #if the lvl starts with air:
             #skip platform generation and move the cursor the platform width over
             #listing air/ground ratios
+            #takes every seconds element from the list
             rendergnds = platforms[::2]
+            print(f"platfoorms = {platforms}")
+            print(f"rendergndds = {rendergnds}")
             #remove the start type so every 2nd one is air
             
             print(f"pop {platforms[0]}")
@@ -232,6 +242,7 @@ def draw_lvl(lvl, rocks):
             renderair = platforms[::2]
 
             #for the amt of platforms, generate a gnd then air slab
+            print(f"reendergnds = {rendergnds}")
             for i in range(len(renderair)+len(rendergnds)):
                 #creating slab section if it should exist
                 if len(rendergnds) > 0:
@@ -240,6 +251,7 @@ def draw_lvl(lvl, rocks):
                     rock_rect = pygame.Rect(xpos, ypos, platwidth, 50)
                     rocks.append(rock_rect)
                     print(f"pop2 {rendergnds[0]}")
+                    print(f"rendergnds = {rendergnds}")
                     rendergnds.pop(0)
                 if len(renderair) > 0:
                     #'generating' the air slab
@@ -249,6 +261,10 @@ def draw_lvl(lvl, rocks):
         #resetting xpos to LHS of screen
         xpos = 0
     return(rocks)
+#find the next level
+def next_lvl(lvl):
+    lvl+=1
+    draw_lvl(lvl, rocks)
 
 draw_lvl(lvl, rocks)
 #game loop
