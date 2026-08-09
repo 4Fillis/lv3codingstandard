@@ -162,13 +162,13 @@ class Platform:
 #}
 
 game_platforms = {
-    1: {"lwr": [[1, 400], ["gnd", 1, 2, 3, 4, 5]],
+    1: {"lwr": [[1, 400], ["gnd", 1, 2]],
         "upr": [[1, 150], ["gnd", 1, 1, 1, 1]],
         "air": [[1, 250], ["air", 1, 2, 3, 4, 5]]},
     2: {"lwr": [[1, 401], ["gnd", 2, 4, 3, 2, 1]],
-        "upr": [[1, 125], ["gnd", 2, 1, 1]],
-        "air": [[1, 240], ["air", 2, 0, 2, 3, 2, 1]]},
-    3: {"lwr": [[1, 402], ["gnd", 3, 3, 4]],
+        "upr": [[1, 125], ["gnd", 2, 4, 2]],
+        "air": [[1, 240], ["air", 2, 3, 2, 1]]},
+    3: {"lwr": [[1, 402], ["gnd", 3, 3, 4, 1, 3, 3, 4]],
         "upr": [[1, 120], ["air", 3, 1]],
         "air": [[1, 230], ["air", 3, 2, 1]]},
 }
@@ -195,7 +195,7 @@ def draw_lvl(lvl, rocks):
     xpos = 0
     #for each height of platforms specified in the lvl
     createrocks = game_platforms[lvl]
-    print(f"createrocks when draw lvl{createrocks}")
+    print(f"lvl: {lvl} createrocks {createrocks}")
 
     for key in createrocks:
         #finding the total amt of platforms
@@ -205,7 +205,6 @@ def draw_lvl(lvl, rocks):
             print("had empty list")
         platforms = createrocks[key][1]
         print(f"key {key}")
-        print(f"createrocks key, {createrocks[key]}")
         print(f"platforms {platforms}")
         if platforms[0] == "air":
             platforms.insert(1, 0)
@@ -216,6 +215,7 @@ def draw_lvl(lvl, rocks):
             xpos += createrocks[key][0][0] 
             #totalpcent is the same as platforms without the starttype
             totalpcent = createrocks[key][1]
+            print(f"poptop {totalpcent[0]}")
             totalpcent.pop(0)
             platx = int(screen_width/sum(totalpcent))
             
@@ -226,6 +226,8 @@ def draw_lvl(lvl, rocks):
             #listing air/ground ratios
             rendergnds = platforms[::2]
             #remove the start type so every 2nd one is air
+            
+            print(f"pop {platforms[0]}")
             platforms.pop(0)
             renderair = platforms[::2]
 
@@ -237,10 +239,12 @@ def draw_lvl(lvl, rocks):
                     rock = Platform()
                     rock_rect = pygame.Rect(xpos, ypos, platwidth, 50)
                     rocks.append(rock_rect)
+                    print(f"pop2 {rendergnds[0]}")
                     rendergnds.pop(0)
                 if len(renderair) > 0:
                     #'generating' the air slab
                     xpos += platwidth + platx*renderair[0]
+                    print(f"pop2 {renderair[0]}")
                     renderair.pop(0)
         #resetting xpos to LHS of screen
         xpos = 0
