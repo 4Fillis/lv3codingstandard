@@ -178,7 +178,6 @@ game_platforms = {
 #starting on lvl 1
 lvl = 2
 
-
 #dict for attributes of gnd types
 #rendered y/n, color
 gndtypes = {
