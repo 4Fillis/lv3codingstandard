@@ -173,10 +173,11 @@ game_platforms = {
         "air": [[1, 240], ["air", 2, 3, 2, 1]]},
     3: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]], #first 4
         "upr": [[1, 120], ["air", 3, 1, 2, 4, 5]], #ISSUE both items
-        "air": [[1, 230], ["air", 3, 2, 1, 4, 5, 3, 2, 1]]}, #ISSUE first 2
+        "air": [[1, 230], ["air", 3, 2, 1, 4, 5, 3, 2, 1, 0]]}, #ISSUE first 2
 }
 #starting on lvl 1
 lvl = 2
+
 
 #dict for attributes of gnd types
 #rendered y/n, color
