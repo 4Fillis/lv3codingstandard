@@ -168,15 +168,15 @@ game_platforms = {
     1: {"lwr": [[1, 400], ["gnd", 2, 2]],
         "upr": [[1, 150], ["gnd", 2, 2, 2, 2]],
         "air": [[1, 250], ["air", 2, 2, 3, 4, 5]]},
-    2: {"lwr": [[1, 401], ["gnd", 2, 4, 3, 2, 7, 8]], #ISSUE THE FIRST FOUR ITEMS ARE BEING DELETED?? WHY??
+    2: {"lwr": [[1, 401], ["gnd", 2, 4, 3, 2, 7, 8]], #ISSUE THE FIRST FOUR ITEMS ARE BEING DELETED?? then every 2nd is left
         "upr": [[1, 125], ["gnd", 2, 4, 2]],
         "air": [[1, 240], ["air", 2, 3, 2, 1]]},
-    3: {"lwr": [[1, 402], ["gnd", 3, 3, 4, 1, 3, 3, 4]],
-        "upr": [[1, 120], ["air", 3, 1]],
-        "air": [[1, 230], ["air", 3, 2, 1]]},
+    3: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]], #first 4
+        "upr": [[1, 120], ["air", 3, 1, 2, 4, 5]], #ISSUE both items
+        "air": [[1, 230], ["air", 3, 2, 1, 4, 5, 3, 2, 1]]}, #ISSUE first 2
 }
 #starting on lvl 1
-lvl = 1
+lvl = 2
 
 
 #dict for attributes of gnd types
@@ -196,7 +196,7 @@ def draw_lvl(lvl, rocks):
     xpos = 0
     #for each height of platforms specified in the lvl
     createrocks = game_platforms[lvl]
-    print(f"draw_lvl createrks = {createrocks}")
+    print(f"draw_lvl createrks = {createrocks} not here")
     print(f"lvl: {lvl} createrocks {createrocks}")
 
     for key in createrocks:
