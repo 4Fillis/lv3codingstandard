@@ -168,7 +168,7 @@ game_platforms = {
     1: {"lwr": [[1, 400], ["gnd", 2, 2]],
         "upr": [[1, 150], ["gnd", 2, 2, 2, 2]],
         "air": [[1, 250], ["air", 2, 2, 3, 4, 5]]},
-    2: {"lwr": [[1, 401], ["gnd", 2, 4, 3, 2, 7]], #ISSUE THE SEVEN IS ALL THATS LEFT FOR SOME REASON? WHY??
+    2: {"lwr": [[1, 401], ["gnd", 2, 4, 3, 2, 7, 8]], #ISSUE THE FIRST FOUR ITEMS ARE BEING DELETED?? WHY??
         "upr": [[1, 125], ["gnd", 2, 4, 2]],
         "air": [[1, 240], ["air", 2, 3, 2, 1]]},
     3: {"lwr": [[1, 402], ["gnd", 3, 3, 4, 1, 3, 3, 4]],
