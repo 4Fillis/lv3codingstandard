@@ -161,22 +161,39 @@ class Platform:
 #    "air": [[1, 250], ["air", 1, 2, 3, 4, 5]]
 #}
 
+#IF CHANGED, change copy_of_game_platforms too
 game_platforms = {
-    1: {"lwr": [[1, 400], ["gnd", 1, 2, 3, 4, 5]],
-        "upr": [[1, 150], ["gnd", 1, 1, 1, 1]],
-        "air": [[1, 250], ["air", 1, 2, 3, 4, 5]]},
-    2: {"lwr": [[1, 401], ["gnd", 2, 4, 3, 2, 1]],
-        "upr": [[1, 125], ["gnd", 2, 1, 1]],
-        "air": [[1, 240], ["air", 2, 0, 2, 3, 2, 1]]},
-    3: {"lwr": [[1, 402], ["gnd", 3, 3, 4]],
-        "upr": [[1, 120], ["air", 3, 1]],
-        "air": [[1, 230], ["air", 3, 2, 1]]},
+    #1,2,3 is the lvl number, "gnd" is what the lvl starts on, numbers after are the % with of either air or gnd
+    #ISSUE this doesnt account for future changes with different gnd types
+    #TODO change it so it always starts with gnd for air just start it w/ 0
+    1: {"lwr": [[1, 400], ["gnd", 2, 2]],
+        "upr": [[1, 150], ["gnd", 2, 2, 2, 2]],
+        "air": [[1, 250], ["air", 2, 2, 3, 4, 5]]},
+    2: {"lwr": [[1, 401], ["gnd", 2, 4, 3, 2, 7, 8]], #ISSUE THE FIRST FOUR ITEMS ARE BEING DELETED?? then every 2nd is left
+        "upr": [[1, 125], ["gnd", 2, 4, 2]],
+        "air": [[1, 240], ["air", 2, 3, 2, 1]]},
+    3: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]], #first 4
+        "upr": [[1, 120], ["air", 3, 1, 2, 4, 5]], #ISSUE both items
+        "air": [[1, 230], ["air", 3, 2, 1, 4, 5, 3, 2, 1, 0]]}, #ISSUE first 2
 }
-lvl = 1
-#find the next level
-def next_lvl(lvl):
-    lvl+=1
-    draw_lvl(lvl, rocks)
+#starting on lvl 1
+lvl = 2
+#direct copy of game playforms for later
+copy_of_game_platforms = {
+    #1,2,3 is the lvl number, "gnd" is what the lvl starts on, numbers after are the % with of either air or gnd
+    #ISSUE this doesnt account for future changes with different gnd types
+    #TODO change it so it always starts with gnd for air just start it w/ 0
+    1: {"lwr": [[1, 400], ["gnd", 2, 2]],
+        "upr": [[1, 150], ["gnd", 2, 2, 2, 2]],
+        "air": [[1, 250], ["air", 2, 2, 3, 4, 5]]},
+    2: {"lwr": [[1, 401], ["gnd", 2, 4, 3, 2, 7, 8]], #ISSUE THE FIRST FOUR ITEMS ARE BEING DELETED?? then every 2nd is left
+        "upr": [[1, 125], ["gnd", 2, 4, 2]],
+        "air": [[1, 240], ["air", 2, 3, 2, 1]]},
+    3: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]], #first 4
+        "upr": [[1, 120], ["air", 3, 1, 2, 4, 5]], #ISSUE both items
+        "air": [[1, 230], ["air", 3, 2, 1, 4, 5, 3, 2, 1, 0]]}, #ISSUE first 2
+}
+
 
 #dict for attributes of gnd types
 #rendered y/n, color
@@ -190,14 +207,17 @@ gndtypes = {
 
 rocks = []
 def draw_lvl(lvl, rocks):
+    loops = 0
     #variables/lists needed
     platwidth = 0
     xpos = 0
     #for each height of platforms specified in the lvl
     createrocks = game_platforms[lvl]
-    print(f"createrocks when draw lvl{createrocks}")
+    print(f"draw_lvl createrks = {createrocks} not here")
+    print(f"lvl: {lvl} createrocks {createrocks}")
 
     for key in createrocks:
+        loops+=1
         #finding the total amt of platforms
         #avoiding empty errors by turning empty lvls into just air
         if (not createrocks[key]) or (len(createrocks[key]) <= 1): 
@@ -205,31 +225,53 @@ def draw_lvl(lvl, rocks):
             print("had empty list")
         platforms = createrocks[key][1]
         print(f"key {key}")
-        print(f"createrocks key, {createrocks[key]}")
         print(f"platforms {platforms}")
-        if platforms[0] == "air":
+        if any in platforms and platforms[0] == "air":
             platforms.insert(1, 0)
         #finding how long each platform is
         #each levels y position
         ypos = createrocks[key][0][1]
-        for x in range(1):
+        for i in range(1):
             xpos += createrocks[key][0][0] 
             #totalpcent is the same as platforms without the starttype
-            totalpcent = createrocks[key][1]
-            totalpcent.pop(0)
-            platx = int(screen_width/sum(totalpcent))
-            
+            #totalpcent = createrocks[key][1]
+            #the row for totalpcent is empty so using the copied dict for it
+            totalpcent = copy_of_game_platforms[lvl][key][1] 
+            print(f"copied total pcent {copy_of_game_platforms[lvl][key]}")
+            print(f"totalcpcs createrockskey = {createrocks[key]}")
+            print(f"totalocetnt = {totalpcent}")
+            print(f"actial dict {game_platforms[lvl]}")
+            print(f"key {key}")
+            #print(f"poptop {totalpcent[0]}")
+            if len(totalpcent) > 0 and type(totalpcent[0]) == str:
+                totalpcent.pop(0) #deleted stuff here
+                print("stringstart deleted")
+            print(f"toalpcent = {totalpcent}")
+            platx = round((screen_width/sum(totalpcent)), 1)
+            platx = int(platx)
+
+            #ISSUE HERE for some reason platforms = 1
             platforms = createrocks[key][1]
+            print(f"crreeaterocks = {createrocks}")
+            print(f"crreaterocks key = {createrocks[key]}")
+            print(f"key = {key}")
+            print(f"platforms?? = {platforms}")
 
             #if the lvl starts with air:
             #skip platform generation and move the cursor the platform width over
             #listing air/ground ratios
+            #takes every seconds element from the list
             rendergnds = platforms[::2]
+            print(f"platfoorms = {platforms}")
+            print(f"rendergndds = {rendergnds}")
             #remove the start type so every 2nd one is air
-            platforms.pop(0)
+            
+            print(f"pop {platforms[0]}")
+            platforms.pop(0) #deleted stuff here as well
             renderair = platforms[::2]
 
             #for the amt of platforms, generate a gnd then air slab
+            print(f"reendergnds = {rendergnds}")
             for i in range(len(renderair)+len(rendergnds)):
                 #creating slab section if it should exist
                 if len(rendergnds) > 0:
@@ -237,14 +279,22 @@ def draw_lvl(lvl, rocks):
                     rock = Platform()
                     rock_rect = pygame.Rect(xpos, ypos, platwidth, 50)
                     rocks.append(rock_rect)
-                    rendergnds.pop(0)
+                    print(f"pop21 {rendergnds[0]}")
+                    print(f"rendergnds = {rendergnds}")
+                    #rendergnds.pop(0) #deleted stuff here too
                 if len(renderair) > 0:
                     #'generating' the air slab
                     xpos += platwidth + platx*renderair[0]
-                    renderair.pop(0)
+                    print(f"pop2 {renderair[0]}")
+                    renderair.pop(0) #deleting again
         #resetting xpos to LHS of screen
         xpos = 0
+    print(f"loops of key = {loops}")
     return(rocks)
+#find the next level
+def next_lvl(lvl):
+    lvl+=1
+    draw_lvl(lvl, rocks)
 
 draw_lvl(lvl, rocks)
 #game loop
