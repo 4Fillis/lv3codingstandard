@@ -20,6 +20,8 @@ wtr_clr = (15, 182, 212)
 plyr_speed = 5
 xpos = 100
 ypos = 100
+yresetpoint = 30
+xresetpoint = 30
 hght = 20
 wdth = 20
 
@@ -153,14 +155,8 @@ class Platform:
         self.pos = [self.xpos, self.ypos]
 
 
-#platform arrangement dict, 
-#start coords are 1st list item, start type & % of screen width is the 2nd list item
-#createrocks = {
-#    "lwr": [[1, 400], ["gnd", 1, 2, 3, 4, 5]],
-#    "upr": [[1, 100], ["gnd", 1, 1, 1, 1]],
-#    "air": [[1, 250], ["air", 1, 2, 3, 4, 5]]
-#}
-
+#starting on lvl 1
+lvl = 1
 #IF CHANGED, change copy_of_game_platforms too
 game_platforms = {
     #1,2,3 is the lvl number, "gnd" is what the lvl starts on, numbers after are the % with of either air or gnd
@@ -169,29 +165,41 @@ game_platforms = {
     1: {"lwr": [[1, 400], ["gnd", 2, 2]],
         "upr": [[1, 150], ["gnd", 2, 2, 2, 2]],
         "air": [[1, 250], ["air", 2, 2, 3, 4, 5]]},
-    2: {"lwr": [[1, 401], ["gnd", 2, 4, 3, 2, 7, 8]], #ISSUE THE FIRST FOUR ITEMS ARE BEING DELETED?? then every 2nd is left
+    2: {"lwr": [[1, 401], ["gnd", 2, 4, 3, 2, 7, 8]],
         "upr": [[1, 125], ["gnd", 2, 4, 2]],
         "air": [[1, 240], ["air", 2, 3, 2, 1]]},
-    3: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]], #first 4
-        "upr": [[1, 120], ["air", 3, 1, 2, 4, 5]], #ISSUE both items
-        "air": [[1, 230], ["air", 3, 2, 1, 4, 5, 3, 2, 1, 0]]}, #ISSUE first 2
+    3: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4]],
+        "upr": [[1, 120], ["air", 3, 1, 2, 4, 5]],
+        "air": [[1, 230], ["air", 3, 2, 2, 1, 0]]}, 
+    4: {"lwr": [[1, 404], ["gnd", 1, 2]],
+        "upr": [[1, 120], ["air", 2, 1]],
+        "air": [[1, 230], ["air", 1, 1]]}, 
+    5: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4]],
+        "upr": [[1, 120], ["air", 4, 3, 2, 1]],
+        "air": [[1, 230], ["air", 1]]}, 
 }
-#starting on lvl 1
-lvl = 2
+
 #direct copy of game playforms for later
 copy_of_game_platforms = {
     #1,2,3 is the lvl number, "gnd" is what the lvl starts on, numbers after are the % with of either air or gnd
     #ISSUE this doesnt account for future changes with different gnd types
     #TODO change it so it always starts with gnd for air just start it w/ 0
+    #TODO change it so the dict doesnt have to be manually copied
     1: {"lwr": [[1, 400], ["gnd", 2, 2]],
         "upr": [[1, 150], ["gnd", 2, 2, 2, 2]],
         "air": [[1, 250], ["air", 2, 2, 3, 4, 5]]},
-    2: {"lwr": [[1, 401], ["gnd", 2, 4, 3, 2, 7, 8]], #ISSUE THE FIRST FOUR ITEMS ARE BEING DELETED?? then every 2nd is left
+    2: {"lwr": [[1, 401], ["gnd", 2, 4, 3, 2, 7, 8]],
         "upr": [[1, 125], ["gnd", 2, 4, 2]],
         "air": [[1, 240], ["air", 2, 3, 2, 1]]},
-    3: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]], #first 4
-        "upr": [[1, 120], ["air", 3, 1, 2, 4, 5]], #ISSUE both items
-        "air": [[1, 230], ["air", 3, 2, 1, 4, 5, 3, 2, 1, 0]]}, #ISSUE first 2
+    3: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4]],
+        "upr": [[1, 120], ["air", 3, 1, 2, 4, 5]],
+        "air": [[1, 230], ["air", 3, 2, 2, 1, 0]]}, 
+    4: {"lwr": [[1, 404], ["gnd", 1, 2]],
+        "upr": [[1, 120], ["air", 2, 1]],
+        "air": [[1, 230], ["air", 1, 1]]}, 
+    5: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4]],
+        "upr": [[1, 120], ["air", 4, 3, 2, 1]],
+        "air": [[1, 230], ["air", 1]]}, 
 }
 
 
@@ -204,17 +212,26 @@ gndtypes = {
     "water": [True, wtr_clr]
 }
 
+#reset function
+def check_alive(xpos, ypos):
+    if plyr.ypos > (screen_height+100):
+        plyr.xpos = 30
+        plyr.ypos = 30
+    return(plyr.xpos, plyr.ypos)
+
 
 rocks = []
 def draw_lvl(lvl, rocks):
+    print(f"lvl: {lvl}")
+    #deleting last lvl platforms from list
+    while len(rocks) > 0:
+        rocks.pop(0)
     loops = 0
     #variables/lists needed
     platwidth = 0
     xpos = 0
-    #for each height of platforms specified in the lvl
+    #to get platform lengths for rendering
     createrocks = game_platforms[lvl]
-    print(f"draw_lvl createrks = {createrocks} not here")
-    print(f"lvl: {lvl} createrocks {createrocks}")
 
     for key in createrocks:
         loops+=1
@@ -222,79 +239,67 @@ def draw_lvl(lvl, rocks):
         #avoiding empty errors by turning empty lvls into just air
         if (not createrocks[key]) or (len(createrocks[key]) <= 1): 
             createrocks[key] = [[0, 0], ["air", 1]]
-            print("had empty list")
+            
         platforms = createrocks[key][1]
-        print(f"key {key}")
-        print(f"platforms {platforms}")
         if any in platforms and platforms[0] == "air":
             platforms.insert(1, 0)
+
         #finding how long each platform is
         #each levels y position
         ypos = createrocks[key][0][1]
         for i in range(1):
             xpos += createrocks[key][0][0] 
             #totalpcent is the same as platforms without the starttype
-            #totalpcent = createrocks[key][1]
-            #the row for totalpcent is empty so using the copied dict for it
+            #using the copied game platforms dict bcos parts get deleted from the original one during platform making
             totalpcent = copy_of_game_platforms[lvl][key][1] 
-            print(f"copied total pcent {copy_of_game_platforms[lvl][key]}")
-            print(f"totalcpcs createrockskey = {createrocks[key]}")
-            print(f"totalocetnt = {totalpcent}")
-            print(f"actial dict {game_platforms[lvl]}")
-            print(f"key {key}")
-            #print(f"poptop {totalpcent[0]}")
+            
             if len(totalpcent) > 0 and type(totalpcent[0]) == str:
-                totalpcent.pop(0) #deleted stuff here
-                print("stringstart deleted")
-            print(f"toalpcent = {totalpcent}")
+                totalpcent.pop(0)
+                
             platx = round((screen_width/sum(totalpcent)), 1)
             platx = int(platx)
 
             #ISSUE HERE for some reason platforms = 1
             platforms = createrocks[key][1]
-            print(f"crreeaterocks = {createrocks}")
-            print(f"crreaterocks key = {createrocks[key]}")
-            print(f"key = {key}")
-            print(f"platforms?? = {platforms}")
 
             #if the lvl starts with air:
             #skip platform generation and move the cursor the platform width over
             #listing air/ground ratios
             #takes every seconds element from the list
             rendergnds = platforms[::2]
-            print(f"platfoorms = {platforms}")
-            print(f"rendergndds = {rendergnds}")
             #remove the start type so every 2nd one is air
-            
-            print(f"pop {platforms[0]}")
-            platforms.pop(0) #deleted stuff here as well
+            #print(f"pop {platforms[0]}")
+            if len(platforms) > 0 and type(platforms[0]) == str:
+                platforms.pop(0) #deleted stuff here as well
             renderair = platforms[::2]
 
             #for the amt of platforms, generate a gnd then air slab
-            print(f"reendergnds = {rendergnds}")
             for i in range(len(renderair)+len(rendergnds)):
                 #creating slab section if it should exist
                 if len(rendergnds) > 0:
+                    if type(rendergnds[0]) == str:
+                        rendergnds.pop(0)
                     platwidth = platx*rendergnds[0]
                     rock = Platform()
                     rock_rect = pygame.Rect(xpos, ypos, platwidth, 50)
                     rocks.append(rock_rect)
-                    print(f"pop21 {rendergnds[0]}")
-                    print(f"rendergnds = {rendergnds}")
-                    #rendergnds.pop(0) #deleted stuff here too
+                    rendergnds.pop(0)
                 if len(renderair) > 0:
                     #'generating' the air slab
                     xpos += platwidth + platx*renderair[0]
-                    print(f"pop2 {renderair[0]}")
-                    renderair.pop(0) #deleting again
+                    #print(f"pop2 {renderair[0]}")
+                    renderair.pop(0)
         #resetting xpos to LHS of screen
         xpos = 0
-    print(f"loops of key = {loops}")
+    #print(f"loops of key = {loops}")
     return(rocks)
 #find the next level
 def next_lvl(lvl):
     lvl+=1
     draw_lvl(lvl, rocks)
+    #reset player location
+    plyr.ypos = yresetpoint
+    plyr.xpos = xresetpoint
 
 draw_lvl(lvl, rocks)
 #game loop
@@ -339,24 +344,18 @@ while rungame == True:
                 cols[3] = True
                 plyr.xpos = rock.left - 50
 
-                #plyr.xpos = rock.left - plyr_speed
-                #plyr.xpos -= 2*plyr_speed
-                #cols[0] = True
-                #falling = False
-                #plyr.ypos -= plyr_speed
-                print("LHS")
             else:
                 #setting all collisions to false
                 for col in cols:
                     cols[col] = False
-                print("no collisions")
+                #print("no collisions")
     #checking for move key inputs
     press = pygame.key.get_pressed()
+    #if going up
     if (press[pygame.K_UP]) and (falling == False) and (cols[1] == False): 
         falling = False
         ignore_gnd[0] = True
         plyr.ypos -= plyr_speed
-        print("UPPPPP")
     #moving down hashed until needed
     #if (press[pygame.K_DOWN]) and (cols[0] == False): 
     #    plyr.ypos+=plyr_speed
@@ -383,16 +382,13 @@ while rungame == True:
         ignore_gnd[0] = False
         ignore_gnd[1] = 0
 
+    check_alive(plyr.xpos, plyr.ypos)
     #resetting player to start if they go off the edge
-    if plyr.ypos > (screen_height+100):
-        plyr.xpos = 30
-        plyr.ypos = 30
     if (plyr.xpos > 300) and (plyr.ypos < 400):
-        print("over")
-        #lvl+=1
         next_lvl(lvl)
-    print(f"lvl: {lvl}")
-    print(f"[{plyr.xpos, plyr.ypos}]")
+    #print(f"plyr coords: [{plyr.xpos}, {plyr.ypos}]")
+    #print(f"lvl: {lvl}")
+    #print(f"[{plyr.xpos, plyr.ypos}]")
     #updating the display
     pygame.display.update()
     #fps to stop crashes

@@ -170,13 +170,13 @@ game_platforms = {
         "air": [[1, 240], ["air", 2, 3, 2, 1]]},
     3: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4]],
         "upr": [[1, 120], ["air", 3, 1, 2, 4, 5]],
-        "air": [[1, 230], ["air", 2, 2, 1, 0]]}, 
+        "air": [[1, 230], ["air", 3, 2, 2, 1, 0]]}, 
     4: {"lwr": [[1, 404], ["gnd", 1, 2]],
         "upr": [[1, 120], ["air", 2, 1]],
         "air": [[1, 230], ["air", 1, 1]]}, 
     5: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4]],
         "upr": [[1, 120], ["air", 4, 3, 2, 1]],
-        "air": [[1, 230], ["air", 1]]}, 
+        "air": [[1, 230], ["gnd", 1]]}, 
 }
 
 #direct copy of game playforms for later
@@ -199,7 +199,7 @@ copy_of_game_platforms = {
         "air": [[1, 230], ["air", 1, 1]]}, 
     5: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4]],
         "upr": [[1, 120], ["air", 4, 3, 2, 1]],
-        "air": [[1, 230], ["air", 1]]}, 
+        "air": [[1, 230], ["gnd", 1]]}, 
 }
 
 
@@ -295,12 +295,11 @@ def draw_lvl(lvl, rocks):
     return(rocks)
 #find the next level
 def next_lvl(lvl):
+    lvl+=1
+    draw_lvl(lvl, rocks)
     #reset player location
     plyr.ypos = yresetpoint
-    lvl+=1
-    print(f"next lvl {lvl}")
-    draw_lvl(lvl, rocks)
-    #return(lvl)
+    plyr.xpos = xresetpoint
 
 draw_lvl(lvl, rocks)
 #game loop
