@@ -108,8 +108,8 @@ if rundb:
 pygame.init()
 #creating window
 pygame.display.set_caption("hella sick game")
-screen_width = 640
-screen_height = 480
+screen_width = 400
+screen_height = 500
 screen = pygame.display.set_mode((screen_width, screen_height))
 screen.fill(bg_clr)
 #clock for making game run at 60fps to avoid crashes
@@ -155,11 +155,11 @@ class Platform:
         self.pos = [self.xpos, self.ypos]
 
 
-#starting on lvl 1
+#starting on level 1
 lvl = 1
 #IF CHANGED, change copy_of_game_platforms too
 game_platforms = {
-    #1,2,3 is the lvl number, "gnd" is what the lvl starts on, numbers after are the % with of either air or gnd
+    #1,2,3 is the level number, "gnd" is what the level starts on, numbers after are the % with of either air or gnd
     #ISSUE this doesnt account for future changes with different gnd types
     #TODO change it so it always starts with gnd for air just start it w/ 0
     1: {"lwr": [[1, 400], ["gnd", 2, 2]],
@@ -167,11 +167,11 @@ game_platforms = {
         "air": [[1, 250], ["air", 2, 2, 3, 4, 5]]},
     2: {"lwr": [[1, 401], ["gnd", 2, 4, 3, 2, 7, 8]],
         "upr": [[1, 125], ["gnd", 2, 4, 2]],
-        "air": [[1, 240], ["air", 2, 3, 2, 1]]},
-    3: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4]],
-        "upr": [[1, 120], ["air", 3, 1, 2, 4, 5]],
-        "air": [[1, 230], ["air", 3, 2, 2, 1, 0]]}, 
-    4: {"lwr": [[1, 404], ["gnd", 1, 2]],
+        "air": [[1, 240], ["gnd", 2, 3, 2, 1]]},
+    3: {"lwr": [[1, 402], ["air", 1, 1, 1, 1, 1, 1]],
+        "upr": [[1, 120], ["gnd", 2, 1, 2, 3, 4, 5]],
+        "air": [[1, 230], ["air", 3, 1, 4, 5, 3, 5, 3, 1]]}, 
+    4: {"lwr": [[1, 404], ["gnd", 1, 2, 3, 2, 4]],
         "upr": [[1, 120], ["air", 2, 1]],
         "air": [[1, 230], ["air", 1, 1]]}, 
     5: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4]],
@@ -181,10 +181,6 @@ game_platforms = {
 
 #direct copy of game playforms for later
 copy_of_game_platforms = {
-    #1,2,3 is the lvl number, "gnd" is what the lvl starts on, numbers after are the % with of either air or gnd
-    #ISSUE this doesnt account for future changes with different gnd types
-    #TODO change it so it always starts with gnd for air just start it w/ 0
-    #TODO change it so the dict doesnt have to be manually copied
     1: {"lwr": [[1, 400], ["gnd", 2, 2]],
         "upr": [[1, 150], ["gnd", 2, 2, 2, 2]],
         "air": [[1, 250], ["air", 2, 2, 3, 4, 5]]},
@@ -223,7 +219,7 @@ def check_alive(xpos, ypos):
 rocks = []
 def draw_lvl(lvl, rocks):
     print(f"lvl: {lvl}")
-    #deleting last lvl platforms from list
+    #deleting last level platforms from list
     while len(rocks) > 0:
         rocks.pop(0)
     loops = 0
@@ -236,7 +232,7 @@ def draw_lvl(lvl, rocks):
     for key in createrocks:
         loops+=1
         #finding the total amt of platforms
-        #avoiding empty errors by turning empty lvls into just air
+        #avoiding empty errors by turning empty levels into just air
         if (not createrocks[key]) or (len(createrocks[key]) <= 1): 
             createrocks[key] = [[0, 0], ["air", 1]]
             
@@ -262,7 +258,7 @@ def draw_lvl(lvl, rocks):
             #ISSUE HERE for some reason platforms = 1
             platforms = createrocks[key][1]
 
-            #if the lvl starts with air:
+            #if the level starts with air:
             #skip platform generation and move the cursor the platform width over
             #listing air/ground ratios
             #takes every seconds element from the list
@@ -300,6 +296,7 @@ def next_lvl(lvl):
     #reset player location
     plyr.ypos = yresetpoint
     plyr.xpos = xresetpoint
+    return(lvl)
 
 draw_lvl(lvl, rocks)
 #game loop
