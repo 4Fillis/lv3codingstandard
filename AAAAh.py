@@ -108,8 +108,8 @@ if rundb:
 pygame.init()
 #creating window
 pygame.display.set_caption("hella sick game")
-screen_width = 400
-screen_height = 500
+screen_width = 750
+screen_height = 550
 screen = pygame.display.set_mode((screen_width, screen_height))
 screen.fill(bg_clr)
 #clock for making game run at 60fps to avoid crashes
@@ -154,58 +154,88 @@ class Platform:
         self.ypos = randint(0, 500) 
         self.pos = [self.xpos, self.ypos]
 
-
+#dict for attributes of gnd types
+#key number is key, then name, then render y/n, then color
+gndtypes = {
+    1: ["air", False, "no"],
+    2: ["gnd", True, gnd_clr],
+    3: ["lava", True, lva_clr],
+    4: ["water", True, wtr_clr]
+}
+gndnames = {
+    101: "air",
+    102: "gnd",
+    103: "lava",
+    104: "water" 
+}
 #starting on level 1
 lvl = 1
-#IF CHANGED, change copy_of_game_platforms too
+
 game_platforms = {
-    #1,2,3 is the level number, "gnd" is what the level starts on, numbers after are the % with of either air or gnd
+    #1,2,3 is the level number, 102 is what the level starts on, numbers after are the % with of either air or gnd
     #ISSUE this doesnt account for future changes with different gnd types
     #TODO change it so it always starts with gnd for air just start it w/ 0
-    1: {"lwr": [[1, 400], ["gnd", 2, 2]],
-        "upr": [[1, 150], ["gnd", 2, 2, 2, 2]],
-        "air": [[1, 250], ["air", 2, 2, 3, 4, 5]]},
-    2: {"lwr": [[1, 401], ["gnd", 2, 4, 3, 2, 7, 8]],
-        "upr": [[1, 125], ["gnd", 2, 4, 2]],
-        "air": [[1, 240], ["gnd", 2, 3, 2, 1]]},
-    3: {"lwr": [[1, 402], ["air", 1, 1, 1, 1, 1, 1]],
-        "upr": [[1, 120], ["gnd", 2, 1, 2, 3, 4, 5]],
-        "air": [[1, 230], ["air", 3, 1, 4, 5, 3, 5, 3, 1]]}, 
-    4: {"lwr": [[1, 404], ["gnd", 1, 2, 3, 2, 4]],
-        "upr": [[1, 120], ["air", 2, 1]],
-        "air": [[1, 230], ["air", 1, 1]]}, 
-    5: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4]],
-        "upr": [[1, 120], ["air", 4, 3, 2, 1]],
-        "air": [[1, 230], ["gnd", 1]]}, 
-}
-
-#direct copy of game playforms for later
-copy_of_game_platforms = {
-    1: {"lwr": [[1, 400], ["gnd", 2, 2]],
-        "upr": [[1, 150], ["gnd", 2, 2, 2, 2]],
-        "air": [[1, 250], ["air", 2, 2, 3, 4, 5]]},
-    2: {"lwr": [[1, 401], ["gnd", 2, 4, 3, 2, 7, 8]],
-        "upr": [[1, 125], ["gnd", 2, 4, 2]],
-        "air": [[1, 240], ["air", 2, 3, 2, 1]]},
-    3: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4]],
-        "upr": [[1, 120], ["air", 3, 1, 2, 4, 5]],
-        "air": [[1, 230], ["air", 3, 2, 2, 1, 0]]}, 
-    4: {"lwr": [[1, 404], ["gnd", 1, 2]],
-        "upr": [[1, 120], ["air", 2, 1]],
-        "air": [[1, 230], ["air", 1, 1]]}, 
-    5: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4]],
-        "upr": [[1, 120], ["air", 4, 3, 2, 1]],
-        "air": [[1, 230], ["gnd", 1]]}, 
-}
-
-
-#dict for attributes of gnd types
-#rendered y/n, color
-gndtypes = {
-    "air": [False, "no"],
-    "gnd": [True, gnd_clr],
-    "lava": [True, lva_clr],
-    "water": [True, wtr_clr]
+    #TODO fix this so gnd is the default and otherwise types can be specified
+    1: {"upr": {
+            "startcoords": [1, 100],
+            "defaulttype": 102,
+            "formation": [[2, 2], [2, 1], [3, 1]]},
+        "air": {
+            "startcoords": [1, 100],
+            "defaulttype": 102,
+            "formation": [[2, 2], [2, 1], [3, 1]]},
+        "lwr": {
+            "startcoords": [1, 100],
+            "defaulttype": 102,
+            "formation": [[2, 2], [2, 1], [3, 1]]}},
+    2: {"upr": {
+            "startcoords": [1, 100],
+            "defaulttype": 102,
+            "formation": [[2, 2], [2, 1], [3, 1]]},
+        "air": {
+            "startcoords": [1, 100],
+            "defaulttype": 102,
+            "formation": [[2, 2], [2, 1], [3, 1]]},
+        "lwr": {
+            "startcoords": [1, 100],
+            "defaulttype": 102,
+            "formation": [[2, 2], [2, 1], [3, 1]]}},
+    3: {"upr": {
+            "startcoords": [1, 100],
+            "defaulttype": 102,
+            "formation": [[2, 2], [2, 1], [3, 1]]},
+        "air": {
+            "startcoords": [1, 100],
+            "defaulttype": 102,
+            "formation": [[2, 2], [2, 1], [3, 1]]},
+        "lwr": {
+            "startcoords": [1, 100],
+            "defaulttype": 102,
+            "formation": [[2, 2], [2, 1], [3, 1]]}},
+    4: {"upr": {
+            "startcoords": [1, 100],
+            "defaulttype": 102,
+            "formation": [[2, 2], [2, 1], [3, 1]]},
+        "air": {
+            "startcoords": [1, 100],
+            "defaulttype": 102,
+            "formation": [[2, 2], [2, 1], [3, 1]]},
+        "lwr": {
+            "startcoords": [1, 100],
+            "defaulttype": 102,
+            "formation": [[2, 2], [2, 1], [3, 1]]}},
+    5: {"upr": {
+            "startcoords": [1, 100],
+            "defaulttype": 102,
+            "formation": [[2, 2], [2, 1], [3, 1]]},
+        "air": {
+            "startcoords": [1, 100],
+            "defaulttype": 102,
+            "formation": [[2, 2], [2, 1], [3, 1]]},
+        "lwr": {
+            "startcoords": [1, 100],
+            "defaulttype": 102,
+            "formation": [[2, 2], [2, 1], [3, 1]]}},
 }
 
 #reset function
@@ -226,17 +256,21 @@ def draw_lvl(lvl, rocks):
     #variables/lists needed
     platwidth = 0
     xpos = 0
-    #to get platform lengths for rendering
-    createrocks = game_platforms[lvl]
+    
+    #to get all the level data from the dict w/o risking modifying the original
+    createrocks = game_platforms[lvl].copy()
 
+    #for each lvl of platform
     for key in createrocks:
         loops+=1
         #finding the total amt of platforms
         #avoiding empty errors by turning empty levels into just air
         if (not createrocks[key]) or (len(createrocks[key]) <= 1): 
-            createrocks[key] = [[0, 0], ["air", 1]]
+            createrocks[key] = {"startcoords": [1, 100], 
+                                "defaulttype": 101, 
+                                "formation": [1, 1]}
             
-        platforms = createrocks[key][1]
+        platforms = createrocks[key]["formation"]
         if any in platforms and platforms[0] == "air":
             platforms.insert(1, 0)
 
@@ -247,7 +281,7 @@ def draw_lvl(lvl, rocks):
             xpos += createrocks[key][0][0] 
             #totalpcent is the same as platforms without the starttype
             #using the copied game platforms dict bcos parts get deleted from the original one during platform making
-            totalpcent = copy_of_game_platforms[lvl][key][1] 
+            totalpcent = game_platforms[lvl][key][1].copy()
             
             if len(totalpcent) > 0 and type(totalpcent[0]) == str:
                 totalpcent.pop(0)
@@ -382,7 +416,7 @@ while rungame == True:
     check_alive(plyr.xpos, plyr.ypos)
     #resetting player to start if they go off the edge
     if (plyr.xpos > 300) and (plyr.ypos < 400):
-        next_lvl(lvl)
+        lvl = next_lvl(lvl)
     #print(f"plyr coords: [{plyr.xpos}, {plyr.ypos}]")
     #print(f"lvl: {lvl}")
     #print(f"[{plyr.xpos, plyr.ypos}]")
