@@ -25,8 +25,8 @@ xpos = 100
 ypos = 100
 yresetpoint = 30
 xresetpoint = 30
-hght = 20
-wdth = 20
+plyr_width = 40
+plyr_height = 40
 
 platheight = 50
 
@@ -385,7 +385,7 @@ while rungame == True:
     if falling == True:
         plyr.ypos += plyr_speed
     #checking for collisions
-    plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, 40, 40)
+    plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, plyr_width, plyr_height)
     for plat in plats:
         #using 0, 0, 0, 0 to use the 0 = False and 1 = True technicality
         #    up-down-left-right
@@ -418,14 +418,14 @@ while rungame == True:
                 #print("no collisions")
     #checking for move key inputs
     press = pygame.key.get_pressed()
-    #x change (horizontal movement)
+    #x change (left and right movement)
     dx = 0
     if (press[pygame.K_LEFT]):
         dx = -plyr_speed
     if (press[pygame.K_RIGHT]):
         dx = plyr_speed
 
-    #y change (vertical)
+    #y change (up and down movement)
     dy = 0
     if falling:
         #positive bcos distance is distance from top of screen
@@ -435,23 +435,38 @@ while rungame == True:
     if press[pygame.K_UP] and (not falling) and (not ignore_gnd[0]):
         ignore_gnd[0] = True
         ignore_gnd[1] = 0
-
-    #if going up
-    if (press[pygame.K_UP]) and (falling == False) and (cols[1] == False): 
         falling = False
-        ignore_gnd[0] = True
-        plyr.ypos -= plyr_speed
-    #moving down hashed until needed
-    #if (press[pygame.K_DOWN]) and (cols[0] == False): 
-    #    plyr.ypos+=plyr_speed
-    if (press[pygame.K_LEFT]) and (cols[2] == False): 
-        plyr.xpos-=plyr_speed
-    if (press[pygame.K_RIGHT]) and (cols[3] == False):
-         plyr.xpos+=plyr_speed
-    if cols[0]  == True:
-        falling = False 
-    else:
-        falling = True
+        dy = -plyr_speed
+
+    #changing plyr coord
+    plyr.xpos += dx
+    plyr.ypos += dy
+
+    #checking each plat for collisions
+    #left and right
+    for plat in plats:
+        if plyr_rect.colliderect(plat.rect):
+            #if moving right, player position set to avoid vibrating collision problem
+            if dx > 0:
+                plyr.xpos = plat.rect.left - plyr_width
+            #if left
+            elif dx < 0:
+                plyr.xpos = plat.rect.right
+            #if falling :(
+            elif dy > 0:
+                plyr.ypos = plat.rect.top - plyr_height
+                falling = False
+                #reset ignore_gnd
+                ignore_gnd[0] = False
+                ignore_gnd[1] = 0
+            #if hitting btm of platform
+            elif dy < 0:
+                plyr.ypos = plat.rect.bottom
+                #stop moving up
+                dy = 0
+
+
+
     #clearing screen
     screen.fill(bg_clr)
     #using blit to add sprites to screen, top left is (0, 0)
