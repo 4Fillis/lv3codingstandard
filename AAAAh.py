@@ -271,8 +271,6 @@ def draw_lvl(lvl, rocks):
                                 "formation": [1, 1]}
             
         platforms = createrocks[key]["formation"]
-        if any in platforms and platforms[0] == "air":
-            platforms.insert(1, 0)
 
         #finding how long each platform is
         #each levels y position
