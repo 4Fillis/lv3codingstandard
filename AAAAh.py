@@ -18,6 +18,7 @@ gnd_clr = (24, 82, 38)
 lva_clr = (163, 61, 29)
 wtr_clr = (38, 159, 181)
 
+print(f"clrs, gnd={gnd_clr}, wtr={wtr_clr}, lva={lva_clr}")
 #main sprite variables
 plyr_speed = 5
 xpos = 100
@@ -202,7 +203,7 @@ game_platforms = {
             #y coord is distance from top
             "startcoords": [0, 120],
             "defaulttype": 102,
-            "formation": [[102, 1], [101, 1], [102, 2], [101, 1], [102, 1]]},
+            "formation": [[102, 1], [101, 4], [102, 2]]},
         "air": {
             "startcoords": [0, 250],
             "defaulttype": 102,
@@ -210,7 +211,7 @@ game_platforms = {
         "lwr": {
             "startcoords": [0, 400],
             "defaulttype": 102,
-            "formation": [[102, 2], [102, 1], [103, 1]]}},
+            "formation": [[102, 2], [102, 1], [103, 2]]}},
     
     2: {"upr": {
             "startcoords": [0, 50],
@@ -321,6 +322,9 @@ def draw_lvl(lvl, plats):
                 plattypes.append(createplats[key]["defaulttype"])
                 platlist.append(createplats[key]["formation"][i])
 
+        print(f"Row: {key}")
+        print(f"  plattypes: {plattypes}")
+        print(f"  platlist: {platlist}")
         #skip if the lvl has no platforms
         if not platlist:
             continue
@@ -342,8 +346,8 @@ def draw_lvl(lvl, plats):
             if plattypes[0] != 101:
                 #creating the subclass instance & making it a platform
                 plat = platcodes[plattypes[0]](xcoord=xpos, ycoord=ypos, width=platwidth, height=platheight)
-                xpos += platwidth
                 plats.append(plat)
+                print(f"  → Class: {plat.__class__.__name__}, Color: {plat.clr}")
             #move to the next platform start point
             xpos += platwidth
             plattypes.pop(0)
