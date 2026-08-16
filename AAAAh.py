@@ -371,6 +371,7 @@ draw_lvl(lvl, plats)
 #game loop
 rungame = True
 falling = True
+#0 is if ignoring gnd for jump purposes, 1 is frame counter, 2 is frames to ignore it for
 ignore_gnd = [False, 0, 40]
 while rungame == True:
     #if the user quits the window
@@ -417,6 +418,24 @@ while rungame == True:
                 #print("no collisions")
     #checking for move key inputs
     press = pygame.key.get_pressed()
+    #x change (horizontal movement)
+    dx = 0
+    if (press[pygame.K_LEFT]):
+        dx = -plyr_speed
+    if (press[pygame.K_RIGHT]):
+        dx = plyr_speed
+
+    #y change (vertical)
+    dy = 0
+    if falling:
+        #positive bcos distance is distance from top of screen
+        dy = plyr_speed
+
+    #jumping
+    if press[pygame.K_UP] and (not falling) and (not ignore_gnd[0]):
+        ignore_gnd[0] = True
+        ignore_gnd[1] = 0
+
     #if going up
     if (press[pygame.K_UP]) and (falling == False) and (cols[1] == False): 
         falling = False
