@@ -194,22 +194,24 @@ platcodes = {
 lvl = 1
 
 game_platforms = {
-    #1,2,3 is the level number, 102 is what the level starts on, numbers after are the % with of either air or gnd
-    #ISSUE this doesnt account for future changes with different gnd types
-    #TODO change it so it always starts with gnd for air just start it w/ 0
-    #TODO fix this so gnd is the default and otherwise types can be specified
+    #1,2,3 is the level number, startcoords is where the lvl starts in the screen (x, y)
+    #defaulttype is the default platform type to prevent having to always specify the type
+    #formation [a, b] form, a is the platform type, b is what % of the screen it is
+    #% is done with the sum of all the level platforms (ex. 2 + 4 + 1 = 7, 2/7 = 2/7th of the screen for that platform)
     1: {"upr": {
-            "startcoords": [0, 100],
+            #y coord is distance from top
+            "startcoords": [0, 120],
             "defaulttype": 102,
-            "formation": [[102, 2], [101, 1], [104, 1]]},
+            "formation": [[102, 1], [101, 1], [102, 2], [101, 1], [102, 1]]},
         "air": {
             "startcoords": [0, 250],
             "defaulttype": 102,
-            "formation": [[102, 2], [102, 1], [103, 1]]},
+            "formation": [[102, 2], [101, 3], [103, 1]]},
         "lwr": {
             "startcoords": [0, 400],
             "defaulttype": 102,
             "formation": [[102, 2], [102, 1], [103, 1]]}},
+    
     2: {"upr": {
             "startcoords": [0, 50],
             "defaulttype": 102,
@@ -298,12 +300,13 @@ def draw_lvl(lvl, plats):
         #each levels y position
         ypos = createplats[key]["startcoords"][1]
 
-        plattypes = []
-        platlist = []
-
-        
         #moving to start position if the lvl has one
-        xpos += createplats[key]["startcoords"][0]
+        xpos = createplats[key]["startcoords"][0]
+
+        #how long each platform is
+        platlist = []
+        #corresponding list of each platform type
+        plattypes = []
 
         #creating a list of the types of platforms in Left->Right order
         #clearing list for a clean loop
@@ -346,8 +349,8 @@ def draw_lvl(lvl, plats):
             plattypes.pop(0)
             platlist.pop(0)
                 
-    #resetting xpos to LHS of screen
-    xpos = 0
+        #resetting xpos to LHS of screen
+        xpos = 0
     #print(f"loops of key = {loops}")
     return(plats)
 
