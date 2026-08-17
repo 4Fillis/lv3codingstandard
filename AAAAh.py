@@ -20,7 +20,12 @@ wtr_clr = (38, 159, 181)
 
 print(f"clrs, gnd={gnd_clr}, wtr={wtr_clr}, lva={lva_clr}")
 #main sprite variables
-plyr_speed = 5
+plyr_speed = 3
+dy = 0.0
+grav = 0.6
+max_speed = 10
+#negitive bcos y distance is distance from top
+jump_speed = -5
 xpos = 100
 ypos = 100
 yresetpoint = 30
@@ -264,7 +269,7 @@ game_platforms = {
 }
 
 #reset function
-def check_alive(xpos, ypos):
+def check_alive():
     if plyr.ypos > (screen_height+100):
         plyr.xpos = 30
         plyr.ypos = 30
@@ -370,52 +375,23 @@ def next_lvl(lvl):
 draw_lvl(lvl, plats)
 #game loop
 rungame = True
-falling = True
+on_gnd = False
 #0 is if ignoring gnd for jump purposes, 1 is frame counter, 2 is frames to ignore it for
 ignore_gnd = [False, 0, 40]
 while rungame == True:
+    #loop variables
+    dy = 0.0
+    on_gnd = False
+    
     #if the user quits the window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-    
-    
 
-    if falling == True:
-        plyr.ypos += plyr_speed
-    #checking for collisions
+    
+    #plyr rect for collisions
     plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, plyr_width, plyr_height)
-    for plat in plats:
-        #using 0, 0, 0, 0 to use the 0 = False and 1 = True technicality
-        #    up-down-left-right
-        cols = [0, 0, 0, 0]
-        if plyr_rect.colliderect(plat):
-            #if the plyr is in the blocks x range and is higher than the plats top. i.e a on a platform
-            if (plyr.xpos >= (plat.rect.left-25)) and (plyr.xpos <= plat.rect.right) and (plyr.ypos <= plat.rect.top) and (ignore_gnd[0] == False):
-                cols[0] = True
-                falling = False
-                plyr.ypos -= plyr_speed
-            #if the player is in the blocks x range and is hitting the bottom of the platform
-            elif (plyr.xpos >= (plat.rect.left-25)) and (plyr.xpos <= (plat.rect.right)) and (plyr.ypos >= (plat.rect.bottom - 5)):
-                falling = True
-                cols[1] = True
-                plyr.ypos += plyr_speed
-            #if the player hits the RHS of a block
-            elif (plyr.xpos >= (plat.rect.left+25)) and (plyr.xpos <= plat.rect.right):
-                cols[2] = True
-                plyr.xpos = plat.rect.right + plyr_speed
-                #plyr.xpos -= plyr_speed
-            #if the player hits the LHS of a block
-            elif (plyr.xpos >= (plat.rect.left-25)) and (plyr.xpos <= (plat.rect.right-10)):
-                cols[3] = True
-                plyr.xpos = plat.rect.left - 50
-
-            else:
-                #setting all collisions to false
-                for col in cols:
-                    cols[col] = False
-                #print("no collisions")
     #checking for move key inputs
     press = pygame.key.get_pressed()
     #x change (left and right movement)
@@ -425,17 +401,21 @@ while rungame == True:
     if (press[pygame.K_RIGHT]):
         dx = plyr_speed
 
+    #rendering movement
+    plyr.xpos += dx
+    plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, plyr_width, plyr_height)
+
     #y change (up and down movement)
     dy = 0
-    if falling:
+    if on_gnd:
         #positive bcos distance is distance from top of screen
         dy = plyr_speed
 
     #jumping
-    if press[pygame.K_UP] and (not falling) and (not ignore_gnd[0]):
+    if press[pygame.K_UP] and (not on_gnd) and (not ignore_gnd[0]):
         ignore_gnd[0] = True
         ignore_gnd[1] = 0
-        falling = False
+        on_gnd = False
         dy = -plyr_speed
 
     #changing plyr coord
@@ -452,10 +432,10 @@ while rungame == True:
             #if left
             elif dx < 0:
                 plyr.xpos = plat.rect.right
-            #if falling :(
+            #if on_gnd :(
             elif dy > 0:
                 plyr.ypos = plat.rect.top - plyr_height
-                falling = False
+                on_gnd = False
                 #reset ignore_gnd
                 ignore_gnd[0] = False
                 ignore_gnd[1] = 0
@@ -473,15 +453,7 @@ while rungame == True:
     screen.blit(plyr.img, (plyr.xpos, plyr.ypos))
     for plat in plats:
         pygame.draw.rect(screen, plat.clr, plat.rect)
-    #ignoring top of block collisions for a few frames while jumping
-    if (ignore_gnd[0] == True) and (ignore_gnd[1] < ignore_gnd[2]):
-        ratio = 2
-        ignore_gnd[1] += round(ratio, 1)
-        plyr.ypos -= round(ratio*plyr_speed, 1)
-    elif (ignore_gnd[1]>=ignore_gnd[2]):
-        ignore_gnd[0] = False
-        ignore_gnd[1] = 0
-
+    
     check_alive(plyr.xpos, plyr.ypos)
     #resetting player to start if they go off the edge
     if (plyr.xpos > 610) and (plyr.ypos < 400):
