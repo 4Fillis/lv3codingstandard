@@ -22,12 +22,15 @@ print(f"clrs, gnd={gnd_clr}, wtr={wtr_clr}, lva={lva_clr}")
 #main sprite variables
 plyr_speed = 3
 dy = 0.0
-grav = 0.6
-max_speed = 10
+grav = 0.5
+dy_maxspeed = 10
 #negitive bcos y distance is distance from top
-jump_speed = -5
+jump_speed = -12
 xpos = 100
 ypos = 100
+#setting dy and dx to prevent any non association errors later
+dx = 0
+dy = 0
 yresetpoint = 30
 xresetpoint = 30
 plyr_width = 40
@@ -137,7 +140,7 @@ class Plyr:
         self.img = pygame.transform.scale(self.img, (n_width, n_height))
         self.xpos = 30
         self.ypos = 0 
-        #self.rect = pygame.Rect(self.xpos, self.ypos, n_width, n_height)
+        #self.rect = pygame.Rect(self.xpos, self.ypos, plyr_width, plyr_height)
 
 #creating the player sprite object
 plyr = Plyr()
@@ -269,11 +272,14 @@ game_platforms = {
 }
 
 #reset function
-def check_alive():
+def check_alive(dx, dy):
     if plyr.ypos > (screen_height+100):
-        plyr.xpos = 30
-        plyr.ypos = 30
-    return(plyr.xpos, plyr.ypos)
+        plyr.xpos = xresetpoint
+        plyr.ypos = yresetpoint
+        dx = 0
+        dy = 0
+    dy=dy
+    return(plyr.xpos, plyr.ypos, dx, dy)
 
 
 #function note: "%" is the proportion of the screen the platforms takes up 
@@ -376,13 +382,9 @@ draw_lvl(lvl, plats)
 #game loop
 rungame = True
 on_gnd = False
-#0 is if ignoring gnd for jump purposes, 1 is frame counter, 2 is frames to ignore it for
-ignore_gnd = [False, 0, 40]
+
 while rungame == True:
-    #loop variables
-    dy = 0.0
-    on_gnd = False
-    
+
     #if the user quits the window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -394,10 +396,15 @@ while rungame == True:
     plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, plyr_width, plyr_height)
     #checking for move key inputs
     press = pygame.key.get_pressed()
+
+    #left right movement/platform collisions
+
     #x change (left and right movement)
     dx = 0
+    #dx is go left
     if (press[pygame.K_LEFT]):
         dx = -plyr_speed
+    #dx makes plyr go right
     if (press[pygame.K_RIGHT]):
         dx = plyr_speed
 
@@ -405,26 +412,10 @@ while rungame == True:
     plyr.xpos += dx
     plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, plyr_width, plyr_height)
 
-    #y change (up and down movement)
-    dy = 0
-    if on_gnd:
-        #positive bcos distance is distance from top of screen
-        dy = plyr_speed
-
-    #jumping
-    if press[pygame.K_UP] and (not on_gnd) and (not ignore_gnd[0]):
-        ignore_gnd[0] = True
-        ignore_gnd[1] = 0
-        on_gnd = False
-        dy = -plyr_speed
-
-    #changing plyr coord
-    plyr.xpos += dx
-    plyr.ypos += dy
-
-    #checking each plat for collisions
-    #left and right
+    #checking left right collisions right after moving
+    #checking each plat for collision
     for plat in plats:
+        #if player hits one of the platforms
         if plyr_rect.colliderect(plat.rect):
             #if moving right, player position set to avoid vibrating collision problem
             if dx > 0:
@@ -432,21 +423,40 @@ while rungame == True:
             #if left
             elif dx < 0:
                 plyr.xpos = plat.rect.right
-            #if on_gnd :(
-            elif dy > 0:
+
+            #rendering plyr position if its changed
+            plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, plyr_width, plyr_height)
+
+    #y change (up and down movement)
+    #positive bcos distance is distance from top of screen
+    if on_gnd == False:
+        dy += grav
+    #checking fall speed isnt over max from acceleration to stop glitches
+    if dy > dy_maxspeed:
+        dy = dy_maxspeed
+
+    #when player jumps (and theyre on a platform)
+    if press[pygame.K_UP] and (on_gnd == True):
+        dy = jump_speed
+    #assuming the plyr is in the air until a collision is detected
+    on_gnd = False
+
+    #moving player
+    plyr.ypos += dy
+    plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, plyr_width, plyr_height)
+
+    #checking top btm collions right after moving
+    for plat in plats:
+        if plyr_rect.colliderect(plat.rect):
+            #if falling
+            if dy > 0:
                 plyr.ypos = plat.rect.top - plyr_height
-                on_gnd = False
-                #reset ignore_gnd
-                ignore_gnd[0] = False
-                ignore_gnd[1] = 0
-            #if hitting btm of platform
+                on_gnd = True
+            #if collision is bcos of plyr jumping
             elif dy < 0:
                 plyr.ypos = plat.rect.bottom
-                #stop moving up
-                dy = 0
-
-
-
+            dy = 0 #TODOmay check if this needs moving to after each "if dy >< 0"
+    
     #clearing screen
     screen.fill(bg_clr)
     #using blit to add sprites to screen, top left is (0, 0)
@@ -454,13 +464,11 @@ while rungame == True:
     for plat in plats:
         pygame.draw.rect(screen, plat.clr, plat.rect)
     
-    check_alive(plyr.xpos, plyr.ypos)
+    check_alive(dy, dx)
     #resetting player to start if they go off the edge
     if (plyr.xpos > 610) and (plyr.ypos < 400):
         lvl = next_lvl(lvl)
-    #print(f"plyr coords: [{plyr.xpos}, {plyr.ypos}]")
-    #print(f"lvl: {lvl}")
-    #print(f"[{plyr.xpos, plyr.ypos}]")
+
     #updating the display
     pygame.display.update()
     #fps to stop crashes
