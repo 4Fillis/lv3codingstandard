@@ -18,9 +18,8 @@ gnd_clr = (24, 82, 38)
 lva_clr = (163, 61, 29)
 wtr_clr = (38, 159, 181)
 
-print(f"clrs, gnd={gnd_clr}, wtr={wtr_clr}, lva={lva_clr}")
 #main sprite variables
-plyr_speed = 3
+plyr_speed = 7
 dy = 0.0
 grav = 0.5
 dy_maxspeed = 10
@@ -139,8 +138,49 @@ class Plyr:
         n_height = int((self.img.get_rect().height)*scale)
         self.img = pygame.transform.scale(self.img, (n_width, n_height))
         self.xpos = 30
-        self.ypos = 0 
+        self.ypos = 0
+        self.maxhealth = 30.0
+        self.health = self.maxhealth
+        self.dmg = 0.0
+        self.healing = 0.0
+
+        #how long between taking damage in seconds*1000 = milliseconds
+        #to avoid the taking dmg every frame at 6fps problem
+        self.healthchangecooldown = 0.5*1000
+        self.whenprevdmg = 0
+        #for achievements
+        self.deaths = 0
         #self.rect = pygame.Rect(self.xpos, self.ypos, plyr_width, plyr_height)
+
+    #reset player character
+    def reset(self, death):
+        self.ypos = yresetpoint
+        self.xpos = xresetpoint
+        if death == True:
+            self.health = self.maxhealth
+            self.deaths += 1
+
+    #adding damage and healing to plyr.health
+    def healthcheck(self):
+        curnttme = pygame.time.get_ticks()
+
+        #if its been more than the cooldown time for damage/healing
+        if (curnttme - self.whenprevdmg) > self.healthchangecooldown:
+            #if the difference between rn time 
+            self.health -= self.dmg
+            self.health += self.healing
+            if self.health > self.maxhealth:
+                self.health = self.maxhealth
+            elif self.health < 0.0:
+                self.health = 0.0
+            self.health = round(self.health, 8)
+            self.whenprevdmg = curnttme
+        self.dmg = 0.0
+        self.healing = 0.0
+        #checking player isnt dead
+        if self.health <= 0.0:
+            self.reset(True)
+
 
 #creating the player sprite object
 plyr = Plyr()
@@ -192,7 +232,12 @@ class Wtr(Platform):
         super().__init__(solid=solid, sped_efct=sped_efct, grav_efct=grav_efct, clr = clr,
                         xcoord=xcoord, ycoord=ycoord, width=width, height=height)
 
+#Damage type vs amount (here bcos it needs to go after class definitions)
+dmgs = {
+    Lva : 5.0,
+}
 
+#used to link an id code to subclasses in case subclass names change
 platcodes = {
     #101 = Air not included in this because it isnt a subclass as it has no needed properties
     102: Gnd,
@@ -456,7 +501,19 @@ while rungame == True:
             elif dy < 0:
                 plyr.ypos = plat.rect.bottom
             dy = 0 #TODOmay check if this needs moving to after each "if dy >< 0"
-    
+
+    #lava/damage collisions
+    for plat in plats:
+        if plyr_rect.colliderect(plat.rect):
+            #checking if its a lava platform\
+            if isinstance(plat, Lva):
+                plyr.dmg += dmgs[Lva]
+            else: 
+                continue
+    #health total
+    plyr.healthcheck()
+    print(f"health: {plyr.health}")
+
     #clearing screen
     screen.fill(bg_clr)
     #using blit to add sprites to screen, top left is (0, 0)
@@ -473,4 +530,3 @@ while rungame == True:
     pygame.display.update()
     #fps to stop crashes
     clock.tick(60)
-    
