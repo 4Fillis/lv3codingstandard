@@ -1,29 +1,41 @@
-#Not following any tutorial, we go freelance
+#Dictionaries to import
 import pygame
 from pygame.locals import *
 import sys
 from random import randint
 from time import sleep
 import os
+from collections import defaultdict
 
 #SQL libraries import
 import sqlite3
 
 #color variables
+
+plyr_clr = (22, 164, 235)
 bg_clr = (158, 233, 255)
 gnd_clr = (24, 82, 38)
-plyr_clr = gnd_clr
-lva_clr = (212, 50, 0)
-wtr_clr = (15, 182, 212)
+lva_clr = (163, 61, 29)
+wtr_clr = (38, 159, 181)
 
 #main sprite variables
-plyr_speed = 5
+plyr_speed = 7
+dy = 0.0
+grav = 0.5
+dy_maxspeed = 10
+#negitive bcos y distance is distance from top
+jump_speed = -12
 xpos = 100
 ypos = 100
+#setting dy and dx to prevent any non association errors later
+dx = 0
+dy = 0
 yresetpoint = 30
 xresetpoint = 30
-hght = 20
-wdth = 20
+plyr_width = 40
+plyr_height = 40
+
+platheight = 50
 
 #fancy pieces sprite variables
 x_stonel = 50
@@ -108,8 +120,8 @@ if rundb:
 pygame.init()
 #creating window
 pygame.display.set_caption("hella sick game")
-screen_width = 640
-screen_height = 480
+screen_width = 750
+screen_height = 550
 screen = pygame.display.set_mode((screen_width, screen_height))
 screen.fill(bg_clr)
 #clock for making game run at 60fps to avoid crashes
@@ -126,8 +138,49 @@ class Plyr:
         n_height = int((self.img.get_rect().height)*scale)
         self.img = pygame.transform.scale(self.img, (n_width, n_height))
         self.xpos = 30
-        self.ypos = 0 
-        #self.rect = pygame.Rect(self.xpos, self.ypos, n_width, n_height)
+        self.ypos = 0
+        self.maxhealth = 30.0
+        self.health = self.maxhealth
+        self.dmg = 0.0
+        self.healing = 0.0
+
+        #how long between taking damage in seconds*1000 = milliseconds
+        #to avoid the taking dmg every frame at 6fps problem
+        self.healthchangecooldown = 0.5*1000
+        self.whenprevdmg = 0
+        #for achievements
+        self.deaths = 0
+        #self.rect = pygame.Rect(self.xpos, self.ypos, plyr_width, plyr_height)
+
+    #reset player character
+    def reset(self, death):
+        self.ypos = yresetpoint
+        self.xpos = xresetpoint
+        if death == True:
+            self.health = self.maxhealth
+            self.deaths += 1
+
+    #adding damage and healing to plyr.health
+    def healthcheck(self):
+        curnttme = pygame.time.get_ticks()
+
+        #if its been more than the cooldown time for damage/healing
+        if (curnttme - self.whenprevdmg) > self.healthchangecooldown:
+            #if the difference between rn time 
+            self.health -= self.dmg
+            self.health += self.healing
+            if self.health > self.maxhealth:
+                self.health = self.maxhealth
+            elif self.health < 0.0:
+                self.health = 0.0
+            self.health = round(self.health, 8)
+            self.whenprevdmg = curnttme
+        self.dmg = 0.0
+        self.healing = 0.0
+        #checking player isnt dead
+        if self.health <= 0.0:
+            self.reset(True)
+
 
 #creating the player sprite object
 plyr = Plyr()
@@ -146,251 +199,334 @@ class Portal:
         self.xpos = 250
         self.ypos = 400
 
-#player character class
+#platform superclass
 class Platform:
-    def __init__(self):
+    def __init__(self, solid: bool, sped_efct: float, grav_efct: float, clr: str, 
+                xcoord: int, ycoord: int, width: int, height: int):
+        #setting attributes
+        self.solid = solid
+        self.sped_efct = sped_efct
+        self.grav_efct = grav_efct
+        self.clr = clr
+        self.xcoord = xcoord
+        self.ycoord = ycoord
+        self.width = width
+        self.height = height
+        self.rect = pygame.Rect(self.xcoord, self.ycoord, self.width, self.height)
 
-        self.xpos = randint(0, 500)
-        self.ypos = randint(0, 500) 
-        self.pos = [self.xpos, self.ypos]
+#Subclasses for different platform types
+class Gnd(Platform):
+    def __init__(self, solid = True, sped_efct = 0.0, grav_efct = 0.0, clr = gnd_clr, xcoord = 0, ycoord = 0, width = 100, height = platheight) -> None:
+        super().__init__(solid=solid, sped_efct=sped_efct, grav_efct=grav_efct, clr = clr,
+                        xcoord=xcoord, ycoord=ycoord, width=width, height=height)
 
 
-#starting on lvl 1
+class Lva(Platform):
+    def __init__(self, solid = False, sped_efct = 0.8, grav_efct = 0.5, clr = lva_clr, xcoord = 0, ycoord = 0, width = 100, height = platheight) -> None:
+        super().__init__(solid=solid, sped_efct=sped_efct, grav_efct=grav_efct, clr = clr,
+                        xcoord=xcoord, ycoord=ycoord, width=width, height=height)
+
+
+class Wtr(Platform):
+    def __init__(self, solid = False, sped_efct = 0.8, grav_efct = 0.5, clr = wtr_clr, xcoord = 0, ycoord = 0, width = 100, height = platheight) -> None:
+        super().__init__(solid=solid, sped_efct=sped_efct, grav_efct=grav_efct, clr = clr,
+                        xcoord=xcoord, ycoord=ycoord, width=width, height=height)
+
+#Damage type vs amount (here bcos it needs to go after class definitions)
+dmgs = {
+    Lva : 5.0,
+}
+
+#used to link an id code to subclasses in case subclass names change
+platcodes = {
+    #101 = Air not included in this because it isnt a subclass as it has no needed properties
+    102: Gnd,
+    103: Lva,
+    104: Wtr
+}
+#starting on level 1
 lvl = 1
-#IF CHANGED, change copy_of_game_platforms too
+
 game_platforms = {
-    #1,2,3 is the lvl number, "gnd" is what the lvl starts on, numbers after are the % with of either air or gnd
-    #ISSUE this doesnt account for future changes with different gnd types
-    #TODO change it so it always starts with gnd for air just start it w/ 0
-    1: {"lwr": [[1, 400], ["gnd", 2, 2]],
-        "upr": [[1, 150], ["gnd", 2, 2, 2, 2]],
-        "air": [[1, 250], ["air", 2, 2, 3, 4, 5]]},
-    2: {"lwr": [[1, 401], ["gnd", 2, 4, 3, 2, 7, 8]],
-        "upr": [[1, 125], ["gnd", 2, 4, 2]],
-        "air": [[1, 240], ["air", 2, 3, 2, 1]]},
-    3: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4]],
-        "upr": [[1, 120], ["air", 3, 1, 2, 4, 5]],
-        "air": [[1, 230], ["air", 3, 2, 2, 1, 0]]}, 
-    4: {"lwr": [[1, 404], ["gnd", 1, 2]],
-        "upr": [[1, 120], ["air", 2, 1]],
-        "air": [[1, 230], ["air", 1, 1]]}, 
-    5: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4]],
-        "upr": [[1, 120], ["air", 4, 3, 2, 1]],
-        "air": [[1, 230], ["air", 1]]}, 
-}
-
-#direct copy of game playforms for later
-copy_of_game_platforms = {
-    #1,2,3 is the lvl number, "gnd" is what the lvl starts on, numbers after are the % with of either air or gnd
-    #ISSUE this doesnt account for future changes with different gnd types
-    #TODO change it so it always starts with gnd for air just start it w/ 0
-    #TODO change it so the dict doesnt have to be manually copied
-    1: {"lwr": [[1, 400], ["gnd", 2, 2]],
-        "upr": [[1, 150], ["gnd", 2, 2, 2, 2]],
-        "air": [[1, 250], ["air", 2, 2, 3, 4, 5]]},
-    2: {"lwr": [[1, 401], ["gnd", 2, 4, 3, 2, 7, 8]],
-        "upr": [[1, 125], ["gnd", 2, 4, 2]],
-        "air": [[1, 240], ["air", 2, 3, 2, 1]]},
-    3: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4]],
-        "upr": [[1, 120], ["air", 3, 1, 2, 4, 5]],
-        "air": [[1, 230], ["air", 3, 2, 2, 1, 0]]}, 
-    4: {"lwr": [[1, 404], ["gnd", 1, 2]],
-        "upr": [[1, 120], ["air", 2, 1]],
-        "air": [[1, 230], ["air", 1, 1]]}, 
-    5: {"lwr": [[1, 402], ["gnd", 1, 2, 3, 4]],
-        "upr": [[1, 120], ["air", 4, 3, 2, 1]],
-        "air": [[1, 230], ["air", 1]]}, 
-}
-
-
-#dict for attributes of gnd types
-#rendered y/n, color
-gndtypes = {
-    "air": [False, "no"],
-    "gnd": [True, gnd_clr],
-    "lava": [True, lva_clr],
-    "water": [True, wtr_clr]
+    #1,2,3 is the level number, startcoords is where the lvl starts in the screen (x, y)
+    #defaulttype is the default platform type to prevent having to always specify the type
+    #formation [a, b] form, a is the platform type, b is what % of the screen it is
+    #% is done with the sum of all the level platforms (ex. 2 + 4 + 1 = 7, 2/7 = 2/7th of the screen for that platform)
+    1: {"upr": {
+            #y coord is distance from top
+            "startcoords": [0, 120],
+            "defaulttype": 102,
+            "formation": [[102, 1], [101, 4], [102, 2]]},
+        "air": {
+            "startcoords": [0, 250],
+            "defaulttype": 102,
+            "formation": [[102, 2], [101, 3], [103, 1]]},
+        "lwr": {
+            "startcoords": [0, 400],
+            "defaulttype": 102,
+            "formation": [[102, 2], [102, 1], [103, 2]]}},
+    
+    2: {"upr": {
+            "startcoords": [0, 50],
+            "defaulttype": 102,
+            "formation": [[102, 2], [102, 1], [103, 1]]},
+        "air": {
+            "startcoords": [0, 10],
+            "defaulttype": 102,
+            "formation": [[102, 2], [102, 1], [103, 1]]},
+        "lwr": {
+            "startcoords": [0, 300],
+            "defaulttype": 102,
+            "formation": [[102, 2], [102, 1], [103, 1]]}},
+    3: {"upr": {
+            "startcoords": [0, 100],
+            "defaulttype": 102,
+            "formation": [[102, 2], [102, 1], [103, 1]]},
+        "air": {
+            "startcoords": [0, 200],
+            "defaulttype": 102,
+            "formation": [[102, 2], [102, 1], [103, 1]]},
+        "lwr": {
+            "startcoords": [0, 300],
+            "defaulttype": 102,
+            "formation": [[102, 2], [102, 1], [103, 1]]}},
+    4: {"upr": {
+            "startcoords": [0, 50],
+            "defaulttype": 102,
+            "formation": [[102, 2], [102, 1], [103, 1]]},
+        "air": {
+            "startcoords": [0, 250],
+            "defaulttype": 102,
+            "formation": [[102, 2], [102, 1], [103, 1]]},
+        "lwr": {
+            "startcoords": [0, 450],
+            "defaulttype": 102,
+            "formation": [[102, 2], [102, 1], [103, 1]]}},
+    5: {"upr": {
+            "startcoords": [0, 320],
+            "defaulttype": 102,
+            "formation": [[102, 2], [102, 1], [103, 1]]},
+        "air": {
+            "startcoords": [0, 20],
+            "defaulttype": 102,
+            "formation": [[102, 2], [102, 1], [103, 1]]},
+        "lwr": {
+            "startcoords": [0, 100],
+            "defaulttype": 102,
+            "formation": [[102, 2], [102, 1], [103, 1]]}},
 }
 
 #reset function
-def check_alive(xpos, ypos):
+def check_alive(dx, dy):
     if plyr.ypos > (screen_height+100):
-        plyr.xpos = 30
-        plyr.ypos = 30
-    return(plyr.xpos, plyr.ypos)
+        plyr.xpos = xresetpoint
+        plyr.ypos = yresetpoint
+        dx = 0
+        dy = 0
+    dy=dy
+    return(plyr.xpos, plyr.ypos, dx, dy)
 
 
-rocks = []
-def draw_lvl(lvl, rocks):
+#function note: "%" is the proportion of the screen the platforms takes up 
+# with the whole being the sum of all the level platform widths
+plats = []
+def draw_lvl(lvl, plats):
     print(f"lvl: {lvl}")
-    #deleting last lvl platforms from list
-    while len(rocks) > 0:
-        rocks.pop(0)
+    #deleting last level platforms from list
+    while len(plats) > 0:
+        plats.pop(0)
     loops = 0
     #variables/lists needed
     platwidth = 0
     xpos = 0
-    #to get platform lengths for rendering
-    createrocks = game_platforms[lvl]
+    
+    #to get all the level data from the dict w/o risking modifying the original
+    createplats = game_platforms[lvl].copy()
 
-    for key in createrocks:
+    #for each lvl of platform
+    for key in createplats:
         loops+=1
         #finding the total amt of platforms
-        #avoiding empty errors by turning empty lvls into just air
-        if (not createrocks[key]) or (len(createrocks[key]) <= 1): 
-            createrocks[key] = [[0, 0], ["air", 1]]
-            
-        platforms = createrocks[key][1]
-        if any in platforms and platforms[0] == "air":
-            platforms.insert(1, 0)
+        #avoiding empty errors by turning empty levels into just air
+        if (not createplats[key]) or (len(createplats[key]) <= 1): 
+            createplats[key] = {"startcoords": [1, 100], 
+                                "defaulttype": 101, 
+                                "formation": [1, 1]}
 
         #finding how long each platform is
         #each levels y position
-        ypos = createrocks[key][0][1]
-        for i in range(1):
-            xpos += createrocks[key][0][0] 
-            #totalpcent is the same as platforms without the starttype
-            #using the copied game platforms dict bcos parts get deleted from the original one during platform making
-            totalpcent = copy_of_game_platforms[lvl][key][1] 
-            
-            if len(totalpcent) > 0 and type(totalpcent[0]) == str:
-                totalpcent.pop(0)
+        ypos = createplats[key]["startcoords"][1]
+
+        #moving to start position if the lvl has one
+        xpos = createplats[key]["startcoords"][0]
+
+        #how long each platform is
+        platlist = []
+        #corresponding list of each platform type
+        plattypes = []
+
+        #creating a list of the types of platforms in Left->Right order
+        #clearing list for a clean loop
+        plattypes.clear()
+        platlist.clear()
+        for i in range(len(createplats[key]["formation"])):
+            #checking if the platform has a specified type
+            if type(createplats[key]["formation"][i]) == list:
+                plattypes.append(createplats[key]["formation"][i][0])
+                platlist.append(createplats[key]["formation"][i][1])
+            else:
+                plattypes.append(createplats[key]["defaulttype"])
+                platlist.append(createplats[key]["formation"][i])
+
+        print(f"Row: {key}")
+        print(f"  plattypes: {plattypes}")
+        print(f"  platlist: {platlist}")
+        #skip if the lvl has no platforms
+        if not platlist:
+            continue
+
+        #totalpcent is the % of all the platforms in that level added up
+        totalpcent = sum(platlist)
+        #setting each platwidth to its specified proportion
+        platx = round((screen_width/totalpcent), 1)
+        platx = int(platx)
+
+        for i in range(len(platlist)):
+            #platwidth is the platform length
+            platwidth = platx*platlist[0]
                 
-            platx = round((screen_width/sum(totalpcent)), 1)
-            platx = int(platx)
-
-            #ISSUE HERE for some reason platforms = 1
-            platforms = createrocks[key][1]
-
-            #if the lvl starts with air:
-            #skip platform generation and move the cursor the platform width over
-            #listing air/ground ratios
-            #takes every seconds element from the list
-            rendergnds = platforms[::2]
-            #remove the start type so every 2nd one is air
-            #print(f"pop {platforms[0]}")
-            if len(platforms) > 0 and type(platforms[0]) == str:
-                platforms.pop(0) #deleted stuff here as well
-            renderair = platforms[::2]
-
-            #for the amt of platforms, generate a gnd then air slab
-            for i in range(len(renderair)+len(rendergnds)):
-                #creating slab section if it should exist
-                if len(rendergnds) > 0:
-                    if type(rendergnds[0]) == str:
-                        rendergnds.pop(0)
-                    platwidth = platx*rendergnds[0]
-                    rock = Platform()
-                    rock_rect = pygame.Rect(xpos, ypos, platwidth, 50)
-                    rocks.append(rock_rect)
-                    rendergnds.pop(0)
-                if len(renderair) > 0:
-                    #'generating' the air slab
-                    xpos += platwidth + platx*renderair[0]
-                    #print(f"pop2 {renderair[0]}")
-                    renderair.pop(0)
+            #creating the platform and then deleting it from the list
+                
+            #creating the platform in its type
+            #checking and skipping air 'platforms'
+            if plattypes[0] != 101:
+                #creating the subclass instance & making it a platform
+                plat = platcodes[plattypes[0]](xcoord=xpos, ycoord=ypos, width=platwidth, height=platheight)
+                plats.append(plat)
+                print(f"  → Class: {plat.__class__.__name__}, Color: {plat.clr}")
+            #move to the next platform start point
+            xpos += platwidth
+            plattypes.pop(0)
+            platlist.pop(0)
+                
         #resetting xpos to LHS of screen
         xpos = 0
     #print(f"loops of key = {loops}")
-    return(rocks)
+    return(plats)
+
 #find the next level
 def next_lvl(lvl):
     lvl+=1
-    draw_lvl(lvl, rocks)
+    draw_lvl(lvl, plats)
     #reset player location
     plyr.ypos = yresetpoint
     plyr.xpos = xresetpoint
+    return(lvl)
 
-draw_lvl(lvl, rocks)
+draw_lvl(lvl, plats)
 #game loop
 rungame = True
-falling = True
-ignore_gnd = [False, 0, 40]
+on_gnd = False
+
 while rungame == True:
+
     #if the user quits the window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-    
-    
 
-    if falling == True:
-        plyr.ypos += plyr_speed
-    #checking for collisions
-    plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, 40, 40)
-    for rock in rocks:
-        #using 0, 0, 0, 0 to use the 0 = False and 1 = True technicality
-        #    up-down-left-right
-        cols = [0, 0, 0, 0]
-        if plyr_rect.colliderect(rock):
-            #if the plyr is in the blocks x range and is higher than the rocks top. i.e a on a platform
-            if (plyr.xpos >= (rock.left-25)) and (plyr.xpos <= rock.right) and (plyr.ypos <= rock.top) and (ignore_gnd[0] == False):
-                cols[0] = True
-                falling = False
-                plyr.ypos -= plyr_speed
-            #if the player is in the blocks x range and is hitting the bottom of the platform
-            elif (plyr.xpos >= (rock.left-25)) and (plyr.xpos <= (rock.right)) and (plyr.ypos >= (rock.bottom - 5)):
-                falling = True
-                cols[1] = True
-                plyr.ypos += plyr_speed
-            #if the player hits the RHS of a block
-            elif (plyr.xpos >= (rock.left+25)) and (plyr.xpos <= rock.right):
-                cols[2] = True
-                plyr.xpos = rock.right + plyr_speed
-                #plyr.xpos -= plyr_speed
-            #if the player hits the LHS of a block
-            elif (plyr.xpos >= (rock.left-25)) and (plyr.xpos <= (rock.right-10)):
-                cols[3] = True
-                plyr.xpos = rock.left - 50
-
-            else:
-                #setting all collisions to false
-                for col in cols:
-                    cols[col] = False
-                #print("no collisions")
+    
+    #plyr rect for collisions
+    plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, plyr_width, plyr_height)
     #checking for move key inputs
     press = pygame.key.get_pressed()
-    #if going up
-    if (press[pygame.K_UP]) and (falling == False) and (cols[1] == False): 
-        falling = False
-        ignore_gnd[0] = True
-        plyr.ypos -= plyr_speed
-    #moving down hashed until needed
-    #if (press[pygame.K_DOWN]) and (cols[0] == False): 
-    #    plyr.ypos+=plyr_speed
-    if (press[pygame.K_LEFT]) and (cols[2] == False): 
-        plyr.xpos-=plyr_speed
-    if (press[pygame.K_RIGHT]) and (cols[3] == False):
-         plyr.xpos+=plyr_speed
-    if cols[0]  == True:
-        falling = False 
-    else:
-        falling = True
+
+    #left right movement/platform collisions
+
+    #x change (left and right movement)
+    dx = 0
+    #dx is go left
+    if (press[pygame.K_LEFT]):
+        dx = -plyr_speed
+    #dx makes plyr go right
+    if (press[pygame.K_RIGHT]):
+        dx = plyr_speed
+
+    #rendering movement
+    plyr.xpos += dx
+    plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, plyr_width, plyr_height)
+
+    #checking left right collisions right after moving
+    #checking each plat for collision
+    for plat in plats:
+        #if player hits one of the platforms
+        if plyr_rect.colliderect(plat.rect):
+            #if moving right, player position set to avoid vibrating collision problem
+            if dx > 0:
+                plyr.xpos = plat.rect.left - plyr_width
+            #if left
+            elif dx < 0:
+                plyr.xpos = plat.rect.right
+
+            #rendering plyr position if its changed
+            plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, plyr_width, plyr_height)
+
+    #y change (up and down movement)
+    #positive bcos distance is distance from top of screen
+    if on_gnd == False:
+        dy += grav
+    #checking fall speed isnt over max from acceleration to stop glitches
+    if dy > dy_maxspeed:
+        dy = dy_maxspeed
+
+    #when player jumps (and theyre on a platform)
+    if press[pygame.K_UP] and (on_gnd == True):
+        dy = jump_speed
+    #assuming the plyr is in the air until a collision is detected
+    on_gnd = False
+
+    #moving player
+    plyr.ypos += dy
+    plyr_rect = pygame.Rect(plyr.xpos, plyr.ypos, plyr_width, plyr_height)
+
+    #checking top btm collions right after moving
+    for plat in plats:
+        if plyr_rect.colliderect(plat.rect):
+            #if falling
+            if dy > 0:
+                plyr.ypos = plat.rect.top - plyr_height
+                on_gnd = True
+            #if collision is bcos of plyr jumping
+            elif dy < 0:
+                plyr.ypos = plat.rect.bottom
+            dy = 0 #TODOmay check if this needs moving to after each "if dy >< 0"
+
+    #lava/damage collisions
+    for plat in plats:
+        if plyr_rect.colliderect(plat.rect):
+            #checking if its a lava platform\
+            if isinstance(plat, Lva):
+                plyr.dmg += dmgs[Lva]
+            else: 
+                continue
+    #health total
+    plyr.healthcheck()
+    print(f"health: {plyr.health}")
+
     #clearing screen
     screen.fill(bg_clr)
     #using blit to add sprites to screen, top left is (0, 0)
     screen.blit(plyr.img, (plyr.xpos, plyr.ypos))
-    for rock in rocks:
-        pygame.draw.rect(screen, plyr_clr, rock)
-    #ignoring top of block collisions for a few frames while jumping
-    if (ignore_gnd[0] == True) and (ignore_gnd[1] < ignore_gnd[2]):
-        ratio = 2
-        ignore_gnd[1] += round(ratio, 1)
-        plyr.ypos -= round(ratio*plyr_speed, 1)
-    elif (ignore_gnd[1]>=ignore_gnd[2]):
-        ignore_gnd[0] = False
-        ignore_gnd[1] = 0
-
-    check_alive(plyr.xpos, plyr.ypos)
+    for plat in plats:
+        pygame.draw.rect(screen, plat.clr, plat.rect)
+    
+    check_alive(dy, dx)
     #resetting player to start if they go off the edge
-    if (plyr.xpos > 300) and (plyr.ypos < 400):
-        next_lvl(lvl)
-    #print(f"plyr coords: [{plyr.xpos}, {plyr.ypos}]")
-    #print(f"lvl: {lvl}")
-    #print(f"[{plyr.xpos, plyr.ypos}]")
+    if (plyr.xpos > 610) and (plyr.ypos < 400):
+        lvl = next_lvl(lvl)
+
     #updating the display
     pygame.display.update()
     #fps to stop crashes
     clock.tick(60)
-    
