@@ -18,6 +18,11 @@ gnd_clr = (24, 82, 38)
 lva_clr = (163, 61, 29)
 wtr_clr = (38, 159, 181)
 
+remhealth_clr = (74, 103, 65)
+maxhealth_clr = (240, 0, 0)
+
+
+
 #main sprite variables
 plyr_speed = 7
 dy = 0.0
@@ -181,9 +186,32 @@ class Plyr:
         if self.health <= 0.0:
             self.reset(True)
 
-
 #creating the player sprite object
 plyr = Plyr()
+
+#creating a class for the health bar
+class HealthBar:
+    def __init__(self, healthx, healthy, width, height, maxhealth):
+        self.xpos = healthx
+        self.ypos = healthy
+        self.width = width
+        self.height = height
+        self.max_health = maxhealth
+        self.health = self.max_health
+
+    #drawing the health bar by drawing 2 bars, the % health on top of the max health
+    def draw_healthbar(self, area):
+        #calculating what % the entity has left (could be applied to non player characters)
+        ratio = self.health/self.max_health
+
+        #drawing the rectangles (1st = max, 2nd = whats left)
+        pygame.draw.rect(area, maxhealth_clr, (self.xpos, self.ypos, self.width, self.height))
+        pygame.draw.rect(area, remhealth_clr, (self.xpos, self.ypos, self.width*ratio, self.height))
+
+#health bar values (px)
+healthbar = HealthBar(10, 10, 150, 20, plyr.maxhealth)
+healthbar.draw_healthbar(screen)
+
 
 #special stones class
 class Portal:
@@ -520,9 +548,13 @@ while rungame == True:
     screen.blit(plyr.img, (plyr.xpos, plyr.ypos))
     for plat in plats:
         pygame.draw.rect(screen, plat.clr, plat.rect)
-    
+
+    #drawing health bar
+    healthbar.health = plyr.health
+    healthbar.draw_healthbar(screen)
+
     check_alive(dy, dx)
-    #resetting player to start if they go off the edge
+    #current lvl switch method
     if (plyr.xpos > 610) and (plyr.ypos < 400):
         lvl = next_lvl(lvl)
 
