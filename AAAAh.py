@@ -354,7 +354,7 @@ def check_alive(dx, dy):
     dy=dy
     return(plyr.xpos, plyr.ypos, dx, dy)
 
-
+#TODO Add a reset game function
 #function note: "%" is the proportion of the screen the platforms takes up 
 # with the whole being the sum of all the level platform widths
 plats = []
