@@ -40,6 +40,8 @@ xresetpoint = 30
 plyr_width = 40
 plyr_height = 40
 
+death_screen = False
+
 platheight = 50
 
 #fancy pieces sprite variables
@@ -148,22 +150,24 @@ class Plyr:
         self.health = self.maxhealth
         self.dmg = 0.0
         self.healing = 0.0
+        self.death = False
 
         #how long between taking damage in seconds*1000 = milliseconds
         #to avoid the taking dmg every frame at 6fps problem
         self.healthchangecooldown = 0.5*1000
         self.whenprevdmg = 0
         #for achievements
-        self.deaths = 0
+        self.deathcnter = 0
         #self.rect = pygame.Rect(self.xpos, self.ypos, plyr_width, plyr_height)
 
     #reset player character
-    def reset(self, death):
+    def plyr_death(self):
         self.ypos = yresetpoint
         self.xpos = xresetpoint
-        if death == True:
-            self.health = self.maxhealth
-            self.deaths += 1
+        self.health = self.maxhealth
+        self.deathcnter += 1
+        death_screen = True
+        return(death_screen)
 
     #adding damage and healing to plyr.health
     def healthcheck(self):
@@ -184,7 +188,7 @@ class Plyr:
         self.healing = 0.0
         #checking player isnt dead
         if self.health <= 0.0:
-            self.reset(True)
+            self.plyr_death()
 
 #creating the player sprite object
 plyr = Plyr()
@@ -355,6 +359,11 @@ def check_alive(dx, dy):
     return(plyr.xpos, plyr.ypos, dx, dy)
 
 #TODO Add a reset game function
+death_screen = {
+
+}
+
+
 #function note: "%" is the proportion of the screen the platforms takes up 
 # with the whole being the sum of all the level platform widths
 plats = []
@@ -558,7 +567,12 @@ while rungame == True:
     if (plyr.xpos > 610) and (plyr.ypos < 400):
         lvl = next_lvl(lvl)
 
-    #updating the display
-    pygame.display.update()
-    #fps to stop crashes
-    clock.tick(60)
+    if True:
+        #updating the display
+        pygame.display.update()
+        #fps to stop crashes
+        clock.tick(60)
+
+
+#TODO add end screens depending on what happened
+#TODO make mc a ghost
