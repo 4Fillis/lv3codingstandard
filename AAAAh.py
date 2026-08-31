@@ -24,12 +24,12 @@ maxhealth_clr = (240, 0, 0)
 
 
 #main sprite variables
-plyr_speed = 7
+plyr_sped = 7
 dy = 0.0
-grav = 0.5
-dy_maxspeed = 10
+fall_sped = 0.5
+dy_maxsped = 10
 #negitive bcos y distance is distance from top
-jump_speed = -12
+jump_sped = -12
 xpos = 100
 ypos = 100
 #setting dy and dx to prevent any non association errors later
@@ -233,12 +233,12 @@ class Portal:
 
 #platform superclass
 class Platform:
-    def __init__(self, solid: bool, sped_efct: float, grav_efct: float, clr: str, 
+    def __init__(self, solid: bool, sped_efct: float, fall_sped_efct: float, clr: str, 
                 xcoord: int, ycoord: int, width: int, height: int):
         #setting attributes
         self.solid = solid
         self.sped_efct = sped_efct
-        self.grav_efct = grav_efct
+        self.fall_sped_efct = fall_sped_efct
         self.clr = clr
         self.xcoord = xcoord
         self.ycoord = ycoord
@@ -248,20 +248,20 @@ class Platform:
 
 #Subclasses for different platform types
 class Gnd(Platform):
-    def __init__(self, solid = True, sped_efct = 0.0, grav_efct = 0.0, clr = gnd_clr, xcoord = 0, ycoord = 0, width = 100, height = platheight) -> None:
-        super().__init__(solid=solid, sped_efct=sped_efct, grav_efct=grav_efct, clr = clr,
+    def __init__(self, solid = True, sped_efct = 0.0, fall_sped_efct = 0.0, clr = gnd_clr, xcoord = 0, ycoord = 0, width = 100, height = platheight) -> None:
+        super().__init__(solid=solid, sped_efct=sped_efct, fall_sped_efct=fall_sped_efct, clr = clr,
                         xcoord=xcoord, ycoord=ycoord, width=width, height=height)
 
 
 class Lva(Platform):
-    def __init__(self, solid = False, sped_efct = 0.8, grav_efct = 0.5, clr = lva_clr, xcoord = 0, ycoord = 0, width = 100, height = platheight) -> None:
-        super().__init__(solid=solid, sped_efct=sped_efct, grav_efct=grav_efct, clr = clr,
+    def __init__(self, solid = False, sped_efct = 0.8, fall_sped_efct = 0.5, clr = lva_clr, xcoord = 0, ycoord = 0, width = 100, height = platheight) -> None:
+        super().__init__(solid=solid, sped_efct=sped_efct, fall_sped_efct=fall_sped_efct, clr = clr,
                         xcoord=xcoord, ycoord=ycoord, width=width, height=height)
 
 
 class Wtr(Platform):
-    def __init__(self, solid = False, sped_efct = 0.8, grav_efct = 0.5, clr = wtr_clr, xcoord = 0, ycoord = 0, width = 100, height = platheight) -> None:
-        super().__init__(solid=solid, sped_efct=sped_efct, grav_efct=grav_efct, clr = clr,
+    def __init__(self, solid = False, sped_efct = 0.8, fall_sped_efct = 0.5, clr = wtr_clr, xcoord = 0, ycoord = 0, width = 100, height = platheight) -> None:
+        super().__init__(solid=solid, sped_efct=sped_efct, fall_sped_efct=fall_sped_efct, clr = clr,
                         xcoord=xcoord, ycoord=ycoord, width=width, height=height)
 
 #Damage type vs amount (here bcos it needs to go after class definitions)
@@ -280,8 +280,14 @@ platcodes = {
 lvl = 1
 
 game_platforms = {
-    #1,2,3 is the level number, startcoords is where the lvl starts in the screen (x, y)
+    #1,2,3 is the level number, 
+    #startcoords is where the lvl starts in the screen (x, y)
+    #^useful in future if code changes are made and more precise level generation is needed
+    #and to avoid having to change from a 'dist from top' to a coords system
+
     #defaulttype is the default platform type to prevent having to always specify the type
+    #also serves as a reference point for level editing
+
     #formation [a, b] form, a is the platform type, b is what % of the screen it is
     #% is done with the sum of all the level platforms (ex. 2 + 4 + 1 = 7, 2/7 = 2/7th of the screen for that platform)
     1: {"upr": {
@@ -485,10 +491,10 @@ while rungame == True:
     dx = 0
     #dx is go left
     if (press[pygame.K_LEFT]):
-        dx = -plyr_speed
+        dx = -plyr_sped
     #dx makes plyr go right
     if (press[pygame.K_RIGHT]):
-        dx = plyr_speed
+        dx = plyr_sped
 
     #rendering movement
     plyr.xpos += dx
@@ -512,14 +518,14 @@ while rungame == True:
     #y change (up and down movement)
     #positive bcos distance is distance from top of screen
     if on_gnd == False:
-        dy += grav
-    #checking fall speed isnt over max from acceleration to stop glitches
-    if dy > dy_maxspeed:
-        dy = dy_maxspeed
+        dy += fall_sped
+    #checking fall sped isnt over max from acceleration to stop glitches
+    if dy > dy_maxsped:
+        dy = dy_maxsped
 
     #when player jumps (and theyre on a platform)
     if press[pygame.K_UP] and (on_gnd == True):
-        dy = jump_speed
+        dy = jump_sped
     #assuming the plyr is in the air until a collision is detected
     on_gnd = False
 
